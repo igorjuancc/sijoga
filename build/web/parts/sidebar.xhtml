@@ -1,0 +1,57 @@
+<ui:composition 
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://xmlns.jcp.org/jsf/core"
+    xmlns:h="http://xmlns.jcp.org/jsf/html"
+    xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+    xmlns:c="http://xmlns.jcp.org/jsp/jstl/core"
+    xmlns:p="http://primefaces.org/ui">
+    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+
+        <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.xhtml">
+            <div class="sidebar-brand-icon">
+                <i class="fas fa-balance-scale"></i>
+            </div>
+            <div class="sidebar-brand-text mx-3">SIJOGA</div>
+        </a>
+
+        <hr class="sidebar-divider my-0" />
+
+        <li class="nav-item active">
+
+            <p:outputPanel rendered="#{loginMb.advogado.id != 0}">  
+                <h:link class="nav-link" value="Processos" outcome="InicioAdvogado">
+                    <i class="fas fa-home"></i>                    
+                </h:link>
+                
+                <h:link class="nav-link" value="Relatorios" outcome="RelatorioAdvogado">
+                    <i class="fas fa-download"></i>                   
+                </h:link>
+                
+                <h:link class="nav-link" value="Novo Processo" outcome="CadastroProcesso">
+                    <i class="fas fa-plus"></i>                    
+                </h:link>    
+                
+                <h:link class="nav-link" value="Novo cliente" outcome="CadastroCliente">
+                    <i class="fas fa-plus"></i>                    
+                </h:link>                      
+            </p:outputPanel>
+            <p:outputPanel rendered="#{loginMb.juiz.id != 0}">  
+                <h:link class="nav-link" value="Processos" outcome="InicioJuiz">
+                    <i class="fas fa-home"></i>                    
+                </h:link>                    
+            </p:outputPanel>
+            <p:outputPanel rendered="#{loginMb.parte.id != 0}">  
+                <h:link class="nav-link" value="Processos" outcome="InicioParte">
+                    <i class="fas fa-home"></i>                    
+                </h:link>                    
+                <h:link class="nav-link" value="Relatórios" outcome="">
+                    <i class="fas fa-download"></i>                    
+                </h:link>                    
+            </p:outputPanel>
+        </li>
+    </ul>
+
+
+
+
+</ui:composition>

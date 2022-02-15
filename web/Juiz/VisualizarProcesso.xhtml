@@ -1,0 +1,213 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition template="/Advogado/AdvogadoTemplate.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:a="http://xmlns.jcp.org/jsf/passthrough">
+
+    <ui:define name="titulo">Juiz - Processo</ui:define>
+    <ui:define name="corpo">   
+        <div class="container-fluid">
+
+            <main role="main" class="col-md-9 col-lg-8 px-5"><br/>
+                <div id="titulo">
+                    <h1>Processo #{processoMb.processo.id}</h1>
+                </div><br/>
+                <div id="atendimentos">
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <th scope="row">#{processoMb.processo.vencedor == null ? "Status" : "Vencedor"}</th>
+                                <td>#{processoMb.processo.vencedor == null ? processoMb.printStatusProcesso(processoMb.processo) : processoMb.processo.vencedor.nome}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Promovente</th>
+                                <td>#{processoMb.processo.promovente.nome}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Advogado Promovente</th>
+                                <td>#{processoMb.processo.advogadoPromovente.nome}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Promovido</th>
+                                <td>#{processoMb.processo.promovido.nome}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Advogado Promovido</th>
+                                <td>#{processoMb.processo.advogadoPromovido.nome}</td>
+                            </tr>     
+                            <h:outputLabel rendered="#{processoMb.processo.vencedor != null}">                                                                  
+                                <tr>
+                                    <th scope="row">Parecer</th>
+                                    <td>#{processoMb.processo.parecer}</td>                        
+                                </tr>                                    
+                            </h:outputLabel>
+                            <ui:repeat value="#{processoMb.processo.fases}" var="fase">
+
+                                <tr>
+                                    <th scope="row"><hr /></th>
+                                    <td>
+                                        <hr />
+                                    </td>                                    
+                                </tr>
+                                <tr>
+                                    <th scope="row">Fase</th>
+                                    <td>
+                                        <h:outputText value="FASE #{processoMb.processo.fases.indexOf(fase)+1}" />
+                                    </td>                                    
+                                </tr>
+                                <tr>
+                                    <th scope="row">Autor</th>
+                                    <td>#{fase.advogado.nome}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Titulo</th>
+                                    <td>#{fase.titulo}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Tipo</th>
+                                    <td>#{fase.tipo == 1 ? 'INFORMATIVA' : 'DELIBERATIVA'}</td>
+                                </tr>
+                                <h:outputLabel rendered="#{fase.tipo == 2}">
+                                    <th scope="row">Status</th>
+                                    <td>
+                                        <h:outputText value="AGUARDANDO RESPOSTA" rendered="#{fase.justificativa == null}" />
+                                        <h:outputText value="#{fase.justificativa == '' ? 'PEDIDO ACEITO' : 'PEDIDO NEGADO'}" rendered="#{fase.justificativa != null}" />                                        
+                                    </td>
+                                </h:outputLabel>
+                                <h:outputLabel rendered="#{fase.justificativa != null and fase.justificativa != ''}">
+                                    <tr>
+                                        <th scope="row">Justificativa</th>
+                                        <td>
+                                            #{fase.justificativa}                                    
+                                        </td>                                        
+                                    </tr>                                    
+                                </h:outputLabel>
+                                <tr>
+                                    <th scope="row">Descriçao</th>
+                                    <td>
+                                        <h:outputText value="#{fase.descricao}" escape="false" />                                    
+                                    </td>
+                                </tr>
+                                <p:outputPanel rendered="#{fase.documento != null}">
+                                    <tr>
+                                        <th scope="row">Arquivo anexo fase</th>
+                                        <td><a href="../Documentos/#{fase.documento.id}#{fase.documento.extensao}" type="download">
+                                                <img src="../img/download.png" alt="processo" width="50" height="50"/>
+                                            </a></td>
+                                    </tr>                                    
+                                </p:outputPanel> 
+                            </ui:repeat> 
+                            <h:form>
+                                <h:outputLabel rendered="#{processoMb.printStatusProcesso(processoMb.processo) == 'FASE DELIBERATIVA' and processoMb.processo.vencedor == null}">
+                                    <tr style=" text-align: center">
+                                        <td>
+                                            <p:commandButton type="button" style=" font-size: medium" value="Recusar">
+                                                <p:ajax event="click" listener="#{processoMb.setRenderJuiz(1)}" update="dialogProcesso" oncomplete="PF('dialogProcesso').show()" />
+                                            </p:commandButton>
+                                        </td>                                        
+                                        <td>
+                                            <p:commandButton style=" font-size: medium" value="Aceitar" actionListener="#{processoMb.atualizarFase(1)}">
+                                                <p:confirm header="Aceitar" message="Aceitar solicitação deliberativa?" />
+                                            </p:commandButton>
+                                        </td>
+                                    </tr>  
+                                </h:outputLabel>
+                                <tr>
+                                    <th scope="row"><hr /></th>
+                                    <td>
+                                        <hr />
+                                    </td>                                    
+                                </tr>
+                                <h:outputLabel rendered="#{processoMb.processo.vencedor == null}">
+                                    <tr style=" text-align: center">
+                                        <td>
+                                            <p:commandButton style=" font-size: medium" value="Intimação" disabled="#{processoMb.printStatusProcesso(processoMb.processo) == 'FASE DELIBERATIVA'}">
+                                                <p:ajax event="click" listener="#{processoMb.setRenderJuiz(3)}" update="dialogProcesso" oncomplete="PF('dialogProcesso').show()" />
+                                            </p:commandButton>  
+                                        </td>                                        
+                                        <td>
+
+                                            <p:commandButton type="button" style=" font-size: medium" value="Encerrar">
+                                                <p:ajax event="click" listener="#{processoMb.setRenderJuiz(2)}" update="dialogProcesso" oncomplete="PF('dialogProcesso').show()" />
+                                            </p:commandButton> 
+
+                                        </td>
+                                    </tr>  
+                                </h:outputLabel>
+                                <h:outputLabel rendered="#{processoMb.processo.vencedor != null}">
+                                    <tr>
+                                        <th scope="row">Status Processo</th>
+                                        <td>ENCERRADO</td>                        
+                                    </tr>                                    
+                                    <tr>
+                                        <th scope="row">Vencedor</th>
+                                        <td>#{processoMb.processo.vencedor.nome}</td>                        
+                                    </tr>                                    
+                                    <tr>
+                                        <th scope="row">Parecer</th>
+                                        <td>#{processoMb.processo.parecer}</td>                        
+                                    </tr>                                    
+                                </h:outputLabel>
+                            </h:form>
+                        </tbody>
+                    </table>
+                </div>
+
+                <a class="scroll-to-top rounded" href="#page-top">
+                    <i class="fas fa-angle-up"></i>
+                </a>
+
+            </main>
+        </div>
+
+        <p:dialog id="dialogProcesso" widgetVar="dialogProcesso" closable="true" modal="true">
+            <h:form id="formConfirma">
+                <p:messages showDetail="false" />
+                <p:panel id="recusaFase" rendered="#{processoMb.renderJuiz == 1}">
+                    <p:outputLabel for="just" value="Justificativa da recusa de fase deliberativa:" /><br />
+                    <p:inputTextarea value="#{processoMb.faseProcesso.justificativa}" id="just" required="true" requiredMessage="Digite a justificativa de recusa da fase" style="width: 100%" />
+                    <div style="text-align: center">
+                        <p:commandButton value="Confirmar" actionListener="#{processoMb.atualizarFase(2)}" update="formConfirma" >
+                            <p:confirm header="Recusa" message="Confirmar recusa de fase deliberativa?" />                        
+                        </p:commandButton>                        
+                    </div>
+                </p:panel>            
+                <p:panel rendered="#{processoMb.renderJuiz == 2}">                    
+                    <p:outputLabel for="vencedor" value="Vencedor do processo:" /><br />
+                    <p:selectOneMenu id="vencedor" value="#{processoMb.processo.vencedor}" converter="omnifaces.SelectItemsConverter">
+                        <f:selectItem itemValue="#{processoMb.processo.promovente}" itemLabel="[PROMOVENTE] - #{processoMb.processo.promovente.nome}" />
+                        <f:selectItem itemValue="#{processoMb.processo.promovido}" itemLabel="[PROMOVIDO] - #{processoMb.processo.promovido.nome}" />                                                
+                    </p:selectOneMenu><br /><br />
+                    <p:outputLabel for="parecer" value="Parecer de encerramento de processo:" /><br />
+                    <p:inputTextarea value="#{processoMb.processo.parecer}" id="parecer" required="true" requiredMessage="Digite o parecer de encerramento do processo" style="width: 100%" />
+                    <div style="text-align: center">
+                        <p:commandButton value="Encerrar" actionListener="#{processoMb.encerrarProcesso}" update="formConfirma" >
+                            <p:confirm header="Encerrar" message="Confirmar encerramento do processo?" />                        
+                        </p:commandButton>                        
+                    </div>                    
+                </p:panel>            
+                <p:panel rendered="#{processoMb.renderJuiz == 3}">
+                    <p:outputLabel for="promotor" value="Selecione o oficial de justiça:" /><br />
+                    <p:selectOneMenu id="promotor" value="#{processoMb.intimacao.oficial}" converter="omnifaces.SelectItemsConverter" disabled="#{processoMb.oficiais == null}" required="true" requiredMessage="Necessário indicar o Oficial de Justiça">
+                        <f:selectItems value="#{processoMb.oficiais}" var="oficial"  itemLabel="#{oficial.nome}" itemValue="#{oficial}" />                                              
+                    </p:selectOneMenu><br /><br />
+                    <p:outputLabel for="intimado" value="Intimado:" /><br />
+                    <p:selectOneMenu id="intimado" value="#{processoMb.intimado}" converter="omnifaces.SelectItemsConverter">
+                        <f:selectItem itemValue="#{processoMb.processo.promovente}" itemLabel="[PROMOVENTE] - #{processoMb.processo.promovente.nome}" />
+                        <f:selectItem itemValue="#{processoMb.processo.promovido}" itemLabel="[PROMOVIDO] - #{processoMb.processo.promovido.nome}" />                                                
+                    </p:selectOneMenu><br /><br />
+                    <div style="text-align: center">
+                        <p:commandButton value="Gerar" actionListener="#{processoMb.criarIntimacao}" update="formConfirma" >
+                            <p:confirm header="Intimação" message="Confirmar criação de intimação do processo?" />                        
+                        </p:commandButton>                        
+                    </div>                      
+                </p:panel>                  
+            </h:form>                      
+        </p:dialog>
+
+    </ui:define>
+</ui:composition>

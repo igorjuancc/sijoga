@@ -1,0 +1,77 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://xmlns.jcp.org/jsf/html"
+    xmlns:ui="http://java.sun.com/jsf/facelets">
+<h:head>
+
+    <title>SIJOGA</title>
+
+    <link href="vendor/fontawesome-free/css/all.css" rel="stylesheet" type="text/css" />
+    <link href="css/sb-admin-2.css" rel="stylesheet" />
+    <link href="css/index.css" rel="stylesheet" />
+
+
+</h:head>
+
+<h:body id="page-top">
+    <div class="bg-gradient-primary text-white" id="accordionSidebar">
+
+        <div class="sidebar-brand d-flex align-items-center justify-content-center">
+            <div class="sidebar-brand-icon d-block">
+                <i class="fas fa-balance-scale logo"></i>
+            </div>
+        </div>
+        <div class="sidebar-brand-text mx-3 mt-1 mb-3 text-center d-block logo-legend">SIJOGA</div>
+
+        <hr class="sidebar-divider my-0" />
+    </div>
+
+
+    <div class="form-row mt-3" >
+        <div class="col-md-4 text-center">
+            <div class="card">
+                <div class="card-title">
+                    Novo Advogado
+                </div>
+                <div class="card-body">
+                    <p>Sou um advogado e gostaria de me cadastrar no Sistema Júridico On-line para Grandes
+                        Administrações</p>
+                    <h:link class="btn btn-primary" value="Cadastrar" outcome="CadastroAdvogado"/>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 text-center">
+            <div class="card">
+                <div class="card-title">
+                    Novo Juiz
+                </div>
+                <div class="card-body">
+                    <p>Sou um juiz e gostaria de me cadastrar no Sistema Júridico On-line para Grandes Administrações
+                    </p>
+                    <h:link class="btn btn-primary" value="Cadastrar" outcome="CadastroJuiz"/>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 text-center">
+            <div class="card">
+                <div class="card-title">
+                    Login
+                </div>
+                <div class="card-body">
+                    <p>Já tenho um cadastro no Sistema Júridico On-line para Grandes Administrações</p>
+                    <h:link class="btn btn-primary" value="Login" outcome="login"/>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer>
+        <div class="footer-copyright text-center py-3">© 2020 
+            <a href="https://www.tads.ufpr.br/"> TADS</a>
+        </div>
+        <!-- Copyright -->
+
+    </footer>
+</h:body>
+
+</html>

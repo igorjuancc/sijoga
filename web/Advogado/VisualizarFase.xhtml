@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition template="/Advogado/AdvogadoTemplate.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:a="http://xmlns.jcp.org/jsf/passthrough">
+
+    <ui:define name="titulo">Advogado - Fase Processo</ui:define>
+    <ui:define name="corpo"> 
+        <div class="container-fluid">
+
+            <main role="main" class="col-md-9 col-lg-8 px-5"><br/>
+                <div id="titulo">
+                    <h1>Fase #{processoMb.processo.fases.indexOf(processoMb.faseProcesso)+1}</h1>
+                    <h3>Processo #{processoMb.processo.id}</h3>
+                </div>
+                <div id="fase">
+                    <h:form>
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <th scope="row">Titulo</th>
+                                    <td>#{processoMb.faseProcesso.titulo}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Tipo</th>
+                                    <td>#{processoMb.faseProcesso.tipo == 1 ? 'INFORMATIVA' : 'DELIBERATIVA'}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Descriçao</th>
+                                    <td>
+                                        <h:outputText value="#{processoMb.faseProcesso.descricao}" escape="false" />                                    
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Status</th>
+                                    <td>#{processoMb.printStatusProcesso(processoMb.processo)}</td>
+                                </tr>
+
+                                <p:outputPanel rendered="#{processoMb.faseProcesso.documento != null}">
+                                    <tr>
+                                        <th scope="row">Arquivo anexo fase</th>
+                                        <td><a href="../Documentos/#{processoMb.faseProcesso.documento.id}#{processoMb.faseProcesso.documento.extensao}" type="download">
+                                                <img src="../img/download.png" alt="processo" width="50" height="50"/>
+                                            </a></td>
+                                    </tr>                                    
+                                </p:outputPanel> 
+                                
+                                <tr>
+                                    <th scope="row">Fases</th>
+                                    <ui:repeat value="#{processoMb.processo.fases}" var="fase">
+                                        <td>
+                                            <h:outputLabel>
+                                                <a href="#">
+                                                    <p:ajax event="click" listener="#{processoMb.verFase(fase.id)}" disabled="#{fase.id == processoMb.faseProcesso.id}" />
+                                                    <h:outputText value="Fase #{processoMb.processo.fases.indexOf(fase)+1}"  />                                                                                               
+                                                </a>
+                                            </h:outputLabel>  
+                                        </td>                                                                              
+                                    </ui:repeat>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </h:form>
+                </div>
+            </main>
+        </div>
+
+    </ui:define>
+</ui:composition>

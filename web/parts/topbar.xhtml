@@ -1,0 +1,46 @@
+<ui:composition 
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:f="http://xmlns.jcp.org/jsf/core"
+    xmlns:h="http://xmlns.jcp.org/jsf/html"
+    xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+    xmlns:p="http://primefaces.org/ui">
+    <h:form>
+        <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+
+            <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                <i class="fa fa-bars"></i>
+            </button>
+
+            <p:outputPanel rendered="#{(facesContext.viewRoot.viewId).equals('/Advogado/InicioAdvogado.xhtml')}" >
+                <div class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
+                    <h:selectOneMenu value="#{advogadoMb.opcFiltro}" class="form-control bg-light border-0 small" id="search">
+                        <f:selectItem itemValue="1" itemLabel="Todos os processos" />
+                        <f:selectItem itemValue="2" itemLabel="Processos abertos" />
+                        <f:selectItem itemValue="3" itemLabel="Processos encerrados" />
+                        <f:selectItem itemValue="4" itemLabel="Processos como promovido" />
+                        <f:selectItem itemValue="5" itemLabel="Processos como promovente" />
+                        <f:selectItem itemValue="6" itemLabel="Processos ganhos como promovido" />
+                        <f:selectItem itemValue="7" itemLabel="Processos ganhos como promovente" />
+                        <p:ajax event="change" listener="#{advogadoMb.listaProcessoAdvogado}" update="formTb:tabProcesso" />
+                    </h:selectOneMenu>
+                </div>                
+            </p:outputPanel>            
+
+            <div class="dropdown-menu-right" aria-labelledby="userDropdown">
+                <!-- <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2"></i>
+                </a>   -->
+                <p:commandButton type="button" styleClass="btn btn-danger" icon="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-white-400">
+                    <p:ajax event="click" listener="#{loginMb.logout}" />
+                    <p:confirm header="Sair" message="Sair do sistema?" />                    
+                </p:commandButton>
+            </div>       
+
+        </nav> 
+        <p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+            <p:commandButton value="Não" type="button" styleClass="ui-confirmdialog-no"  />
+            <p:commandButton value="Sim" type="button" styleClass="ui-confirmdialog-yes" />                
+        </p:confirmDialog>
+    </h:form>
+
+</ui:composition>

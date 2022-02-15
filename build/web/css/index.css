@@ -1,0 +1,29 @@
+.card {
+    margin: 10px 20px
+}
+
+.card-title {
+    background-color: #002e66;
+    color: white;
+    font-weight: 700;
+    padding: 20px;
+}
+
+footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+.logo {
+    font-size: 200px;
+}
+
+.logo-legend {
+    font-size: 32px;
+}
+
+footer {
+    display: fixed;
+    bottom: 0
+}

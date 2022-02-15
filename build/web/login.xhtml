@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+    <h:head>
+        <title>SIJOGA</title>
+
+        <link href="vendor/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css"/>
+
+        <link href="vendor/fontawesome-free/css/all.css" rel="stylesheet"/>
+
+        <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,200i,300,300i,400,400i,600,600i,700,700i,900,900i" rel="stylesheet"/>
+        <link href="https://fonts.googleapis.com/css?family=Merriweather:300,300i,400,400i,700,700i,900,900i" rel="stylesheet"/>
+
+        <link href="css/coming-soon.css" rel="stylesheet"/>
+    </h:head>
+    <h:body>
+        <img  class="inicial-page" src="img/img-inicial.jpg"/>
+
+        <div class="masthead">
+            <div class="masthead-bg"></div>
+            <div class="container h-100">
+                <div class="row h-100">
+                    <div class="col-12 my-auto">
+                        <div class="masthead-content text-white py-5 py-md-0">
+                            <h:form id="formLogin">
+                                <h1 class="mb-3">SIJOGA</h1>
+                                <p:inputText placeholder="Email" id="email" value="#{loginMb.email}" required="true" requiredMessage="Digite o seu email" validatorMessage="Informe um email válido" class="form-control">
+                                    <f:validateRegex pattern="^[_A-Za-z0-9-\+]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})$"/>                        
+                                </p:inputText><br/>
+                                <p:password  placeholder="Senha" value="#{loginMb.senha}" class="form-control"
+                                             required="true" requiredMessage="Digite sua senha"/><br/>
+                                <h:selectOneMenu value="#{loginMb.tipoLogin}" class="form-control">
+                                    <f:selectItem itemLabel="Advogado" itemValue="1" />
+                                    <f:selectItem itemLabel="Juiz" itemValue="2" />
+                                    <f:selectItem itemLabel="Parte" itemValue="3" />                                
+                                </h:selectOneMenu>
+                                <div class="checkbox mb-3">
+                                    <p:messages showDetail="false" />                                
+                                </div>
+                                <h:commandButton value="Entrar" action="#{loginMb.efetuaLogin}" class="btn btn-lg btn-secondary btn-block" />             
+                            </h:form>                                                       
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </h:body>
+</html>
+

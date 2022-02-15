@@ -1,0 +1,61 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition template="/Parte/ParteTemplate.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <ui:define name="titulo">Parte - Início</ui:define>
+    <ui:define name="corpo">   
+
+        <div class="container-fluid">
+            <h:form id="formTb">
+                <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                    <h1 class="h3 mb-0 text-gray-800">Processos</h1>
+                </div>
+
+                <h:dataTable id="tabProcesso" value="#{parteMb.processos}" var="processo" class="table table-bordered" >
+                    <h:column>
+                        <f:facet name="header" >Titulo</f:facet> 
+                        <p:outputPanel style="#{parteMb.printStatusProcesso(processo) == 'FASE DELIBERATIVA' ? 'color: red' : ''}">
+                            #{processo.fases.get(0).getTitulo()}
+                        </p:outputPanel>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header" >Status</f:facet> 
+                        <p:outputPanel style="#{parteMb.printStatusProcesso(processo) == 'FASE DELIBERATIVA' ? 'color: red' : ''}">
+                            <f:facet name="header">Status</f:facet> 
+                                #{parteMb.printStatusProcesso(processo)}
+                        </p:outputPanel>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Parte</f:facet> 
+                        <p:outputPanel style="#{parteMb.printStatusProcesso(processo) == 'FASE DELIBERATIVA' ? 'color: red' : ''}">
+                            #{processo.promovente.id == parteMb.login.parte.id ? "PROMOVENTE" : "PROMOVIDA"}
+                        </p:outputPanel>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Data de abertura</f:facet> 
+                        <p:outputPanel style="#{parteMb.printStatusProcesso(processo) == 'FASE DELIBERATIVA' ? 'color: red' : ''}">
+                            <h:outputText value="#{processo.dataInicio}">
+                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+                            </h:outputText> 
+                        </p:outputPanel>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Ação</f:facet>                         
+
+                        <h:outputLabel class='btn btn-sm btn-primary'>                            
+                            <p:ajax event="click" listener="#{parteMb.verProcesso(processo.id)}" />
+                            <i class='fas fa-eye'></i>                           
+                        </h:outputLabel>
+
+                    </h:column>
+                </h:dataTable> 
+            </h:form>
+        </div>
+
+    </ui:define>
+</ui:composition>
