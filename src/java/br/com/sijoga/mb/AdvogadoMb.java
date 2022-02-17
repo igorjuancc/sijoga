@@ -13,8 +13,6 @@ import br.com.sijoga.util.SijogaUtil;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.view.ViewScoped;
@@ -86,11 +84,8 @@ public class AdvogadoMb implements Serializable {
         try {
             this.estadoSelect.setCidades(CidadeFacade.listaCidadePorEstado(this.estadoSelect));
         } catch (Exception e) {
-            try {
-                SijogaUtil.mensagemErroRedirecionamento(e);
-            } catch (IOException ex) {
-                Logger.getLogger(AdvogadoMb.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            e.printStackTrace(System.out);
+            SijogaUtil.mensagemErroRedirecionamento("Houve um problema ao buscar dados de cidades");
         }
     }
 
@@ -120,11 +115,8 @@ public class AdvogadoMb implements Serializable {
                     break;
             }
         } catch (Exception e) {
-            try {
-                SijogaUtil.mensagemErroRedirecionamento(e);
-            } catch (IOException ex) {
-                Logger.getLogger(AdvogadoMb.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            e.printStackTrace(System.out);
+            SijogaUtil.mensagemErroRedirecionamento("Houve um problema ao listar processos de advogado");
         }
     }
 
@@ -133,12 +125,9 @@ public class AdvogadoMb implements Serializable {
             ExternalContext ctxExt = FacesContext.getCurrentInstance().getExternalContext();
             FacesContext.getCurrentInstance().getExternalContext().getFlash().put("idProcesso", id);
             ctxExt.redirect(ctxExt.getRequestContextPath() + "/Advogado/VisualizarProcesso.jsf");
-        } catch (Exception e) {
-            try {
-                SijogaUtil.mensagemErroRedirecionamento(e);
-            } catch (IOException ex) {
-                Logger.getLogger(AdvogadoMb.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        } catch (IOException e) {
+            e.printStackTrace(System.out);
+            SijogaUtil.mensagemErroRedirecionamento("Houve um problema ao visualizar detalhes do processo");
         }
     }
 
@@ -146,12 +135,9 @@ public class AdvogadoMb implements Serializable {
         try {
             ExternalContext ctxExt = FacesContext.getCurrentInstance().getExternalContext();
             ctxExt.redirect(ctxExt.getRequestContextPath() + "/index.jsf");
-        } catch (Exception e) {
-            try {
-                SijogaUtil.mensagemErroRedirecionamento(e);
-            } catch (IOException ex) {
-                Logger.getLogger(AdvogadoMb.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        } catch (IOException e) {
+            e.printStackTrace(System.out);
+            SijogaUtil.mensagemErroRedirecionamento("Houve um problema ao redirecionar página");
         }
     }
 
@@ -160,12 +146,9 @@ public class AdvogadoMb implements Serializable {
             ExternalContext ctxExt = FacesContext.getCurrentInstance().getExternalContext();
             FacesContext.getCurrentInstance().getExternalContext().getFlash().put("idProcesso", id);
             ctxExt.redirect(ctxExt.getRequestContextPath() + "/Advogado/NovaFase.jsf");
-        } catch (Exception e) {
-            try {
-                SijogaUtil.mensagemErroRedirecionamento(e);
-            } catch (IOException ex) {
-                Logger.getLogger(AdvogadoMb.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        } catch (IOException e) {
+            e.printStackTrace(System.out);
+            SijogaUtil.mensagemErroRedirecionamento("Houve um problema ao redirecionar página de nova fase");
         }
     }
 

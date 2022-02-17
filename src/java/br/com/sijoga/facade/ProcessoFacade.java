@@ -186,87 +186,69 @@ public class ProcessoFacade {
         }
     }
 
-    public static List<Processo> listaProcessosAdvogadoAbertos(Advogado advogado) throws DaoException {
+    public static List<Processo> listaProcessosAdvogadoAbertos(Advogado advogado) {
         try {
             return processoDao.listaProcessosAdvogadoAbertos(advogado);
         } catch (DaoException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            throw e;
-        } catch (Exception e) {
-            System.out.println("****Problema ao listar processos de advogado em aberto [Facade]****" + e);
-            e.printStackTrace();
-            throw e;
+            e.printStackTrace(System.out);
+            String msg = "Houve um problema ao listar processos em aberto de advogado";
+            SijogaUtil.mensagemErroRedirecionamento(msg);
+            return null;
         }
     }
 
-    public static List<Processo> listaProcessosAdvogadoFechados(Advogado advogado) throws DaoException {
+    public static List<Processo> listaProcessosAdvogadoFechados(Advogado advogado) {
         try {
             return processoDao.listaProcessosAdvogadoFechados(advogado);
         } catch (DaoException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            throw e;
-        } catch (Exception e) {
-            System.out.println("****Problema ao listar processos de advogado fechados [Facade]****" + e);
-            e.printStackTrace();
-            throw e;
+            e.printStackTrace(System.out);
+            String msg = "Houve um problema ao listar processos fechados de advogado";
+            SijogaUtil.mensagemErroRedirecionamento(msg);
+            return null;
         }
     }
 
-    public static List<Processo> listaProcessosAdvogadoPromovido(Advogado advogado) throws DaoException {
+    public static List<Processo> listaProcessosAdvogadoPromovido(Advogado advogado) {
         try {
             return processoDao.listaProcessosAdvogadoPromovido(advogado);
         } catch (DaoException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            throw e;
-        } catch (Exception e) {
-            System.out.println("****Problema ao listar processos de advogado promovido [Facade]****" + e);
-            e.printStackTrace();
-            throw e;
+            e.printStackTrace(System.out);
+            String msg = "Houve um problema ao listar processos promovidos de advogado";
+            SijogaUtil.mensagemErroRedirecionamento(msg);
+            return null;
         }
     }
 
-    public static List<Processo> listaProcessosAdvogadoPromovente(Advogado advogado) throws DaoException {
+    public static List<Processo> listaProcessosAdvogadoPromovente(Advogado advogado) {
         try {
             return processoDao.listaProcessosAdvogadoPromovente(advogado);
         } catch (DaoException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            throw e;
-        } catch (Exception e) {
-            System.out.println("****Problema ao listar processos de advogado promovente [Facade]****" + e);
-            e.printStackTrace();
-            throw e;
+            e.printStackTrace(System.out);
+            String msg = "Houve um problema ao listar processos de advogado promovente";
+            SijogaUtil.mensagemErroRedirecionamento(msg);
+            return null;
         }
     }
 
-    public static List<Processo> listaProcessosAdvogadoPromovidoGanho(Advogado advogado) throws DaoException {
+    public static List<Processo> listaProcessosAdvogadoPromovidoGanho(Advogado advogado) {
         try {
             return processoDao.listaProcessosAdvogadoPromovidoGanho(advogado);
         } catch (DaoException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            throw e;
-        } catch (Exception e) {
-            System.out.println("****Problema ao listar processos de advogado promovido ganho [Facade]****" + e);
-            e.printStackTrace();
-            throw e;
+            e.printStackTrace(System.out);
+            String msg = "Houve um problema ao listar processos promovidos ganho de advogado";
+            SijogaUtil.mensagemErroRedirecionamento(msg);
+            return null;
         }
     }
 
-    public static List<Processo> listaProcessosAdvogadoPromoventeGanho(Advogado advogado) throws DaoException {
+    public static List<Processo> listaProcessosAdvogadoPromoventeGanho(Advogado advogado) {
         try {
             return processoDao.listaProcessosAdvogadoPromoventeGanho(advogado);
         } catch (DaoException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            throw e;
-        } catch (Exception e) {
-            System.out.println("****Problema ao listar processos de advogado promovente ganho [Facade]****" + e);
-            e.printStackTrace();
-            throw e;
+            e.printStackTrace(System.out);
+            String msg = "Houve um problema ao listar processos ganhos de advogado promovente";
+            SijogaUtil.mensagemErroRedirecionamento(msg);
+            return null;
         }
     }
 
