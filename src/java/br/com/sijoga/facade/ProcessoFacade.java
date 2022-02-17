@@ -7,6 +7,7 @@ import br.com.sijoga.bean.Parte;
 import br.com.sijoga.bean.Processo;
 import br.com.sijoga.dao.ProcessoDao;
 import br.com.sijoga.exception.DaoException;
+import br.com.sijoga.util.SijogaUtil;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -20,7 +21,7 @@ public class ProcessoFacade {
     public static List<String> cadastrarProcesso(Processo processo, UploadedFile arquivo) throws NoSuchAlgorithmException, DaoException {
         try {
             List<String> mensagens = new ArrayList();
-            Date dataHoje = new Date();           
+            Date dataHoje = new Date();
             FaseProcesso fase1 = processo.getFases().get(0);
 
             if ((processo.getAdvogadoPromovente() == null) || (processo.getAdvogadoPromovente().getId() == 0)) {
@@ -48,49 +49,49 @@ public class ProcessoFacade {
 
             if ((processo.getFases() == null) || (processo.getFases().isEmpty())) {
                 mensagens.add("Necessário uma fase para iniciar o processo");
-            } else {                
+            } else {
                 fase1.setDataHora(dataHoje);
                 fase1.setTipo(1);
-                
+
                 if ((fase1.getTitulo() == null)) {
                     mensagens.add("Necessário inserir um título para a primeira fase do processo");
                 } else {
-                    fase1.setTitulo(fase1.getTitulo().trim().toUpperCase());  
+                    fase1.setTitulo(fase1.getTitulo().trim().toUpperCase());
                     if (("".equals(fase1.getTitulo())) || " ".equals(fase1.getTitulo())) {
                         mensagens.add("Titulo inválido");
                     }
                 }
-                
+
                 if ((fase1.getDescricao() == null)) {
                     mensagens.add("Necessário inserir uma descrição para a primeira fase do processo");
                 } else {
-                    fase1.setDescricao(fase1.getDescricao().trim().toUpperCase()); 
+                    fase1.setDescricao(fase1.getDescricao().trim().toUpperCase());
                     if (("".equals(fase1.getDescricao())) || " ".equals(fase1.getDescricao())) {
                         mensagens.add("Descrição do processo inválida");
                     }
                 }
-                
-                if((fase1.getAdvogado() == null) || fase1.getAdvogado().getId() == 0) {
+
+                if ((fase1.getAdvogado() == null) || fase1.getAdvogado().getId() == 0) {
                     mensagens.add("Necessário um advogado para criação da primeira fase do processo");
                 }
-                
-                if(arquivo != null) {
+
+                if (arquivo != null) {
                     if (arquivo.getSize() > 2097152) {
                         mensagens.add("Tamanho do arquivo maior que 2MB");
                     }
                     if (!"application/pdf".equals(arquivo.getContentType())) {
-                        mensagens.add("Formato de arquivo inválido");                        
-                    }                    
-                }                
+                        mensagens.add("Formato de arquivo inválido");
+                    }
+                }
             }
 
-            if (mensagens.isEmpty()) {                
+            if (mensagens.isEmpty()) {
                 processo.setDataInicio(dataHoje);
                 processo.setJuiz(JuizFacade.buscarJuizProcessos()); //Buscar juiz com menos processos em aberto
                 processo.getFases().remove(0);
                 processoDao.cadastrarProcesso(processo);
                 fase1.setProcesso(processo);
-                mensagens = FaseProcessoFacade.cadastrarFaseProcesso(fase1, arquivo);                
+                mensagens = FaseProcessoFacade.cadastrarFaseProcesso(fase1, arquivo);
             }
 
             return mensagens;
@@ -104,15 +105,15 @@ public class ProcessoFacade {
             throw e;
         }
     }
-    
+
     public static String finalizarProcesso(Processo processo) throws DaoException {
         try {
             if (processo.getParecer() == null) {
-                return "Necessário um parecer para encerrar o processo";                
+                return "Necessário um parecer para encerrar o processo";
             } else if (processo.getParecer().trim().equals("")) {
                 return "Parecer inválido";
             } else if ((processo.getVencedor() == null) || (processo.getVencedor().getId() == 0)) {
-                return "Necessário indicar o vencedor do processo";                
+                return "Necessário indicar o vencedor do processo";
             } else if ((processo.getVencedor().getId() != processo.getPromovente().getId())
                     && (processo.getVencedor().getId() != processo.getPromovido().getId())) {
                 return "Vencedor do processo inválido";
@@ -120,7 +121,7 @@ public class ProcessoFacade {
                 processo.setParecer(processo.getParecer().toUpperCase());
                 processoDao.atualizarProcesso(processo);
                 return null;
-            }   
+            }
         } catch (DaoException e) {
             System.out.println(e.getMessage());
             e.printStackTrace();
@@ -129,9 +130,9 @@ public class ProcessoFacade {
             System.out.println("****Problema ao finalizar processo [Facade]****" + e);
             e.printStackTrace();
             throw e;
-        }        
+        }
     }
-    
+
     public static Processo buscaProcessoId(int id) throws DaoException {
         try {
             return processoDao.buscaProcessoId(id);
@@ -145,21 +146,18 @@ public class ProcessoFacade {
             throw e;
         }
     }
-    
-    public static List<Processo> listaTodosProcessosAdvogado(Advogado advogado) throws DaoException {
+
+    public static List<Processo> listaTodosProcessosAdvogado(Advogado advogado) {
         try {
             return processoDao.listaTodosProcessosAdvogado(advogado);
         } catch (DaoException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            throw e;
-        } catch (Exception e) {
-            System.out.println("****Problema ao listar processos de advogado [Facade]****" + e);
-            e.printStackTrace();
-            throw e;
+            e.printStackTrace(System.out);
+            String msg = "Houve um problema ao listar processos de advogado";
+            SijogaUtil.mensagemErroRedirecionamento(msg);
+            return null;
         }
     }
-    
+
     public static List<Processo> listaTodosProcessosJuiz(Juiz juiz) throws DaoException {
         try {
             return processoDao.listaTodosProcessosJuiz(juiz);
@@ -173,7 +171,7 @@ public class ProcessoFacade {
             throw e;
         }
     }
-    
+
     public static List<Processo> listaTodosProcessosParte(Parte parte) throws DaoException {
         try {
             return processoDao.listaTodosProcessosParte(parte);
@@ -187,7 +185,7 @@ public class ProcessoFacade {
             throw e;
         }
     }
-    
+
     public static List<Processo> listaProcessosAdvogadoAbertos(Advogado advogado) throws DaoException {
         try {
             return processoDao.listaProcessosAdvogadoAbertos(advogado);
@@ -201,6 +199,7 @@ public class ProcessoFacade {
             throw e;
         }
     }
+
     public static List<Processo> listaProcessosAdvogadoFechados(Advogado advogado) throws DaoException {
         try {
             return processoDao.listaProcessosAdvogadoFechados(advogado);
@@ -214,6 +213,7 @@ public class ProcessoFacade {
             throw e;
         }
     }
+
     public static List<Processo> listaProcessosAdvogadoPromovido(Advogado advogado) throws DaoException {
         try {
             return processoDao.listaProcessosAdvogadoPromovido(advogado);
@@ -227,6 +227,7 @@ public class ProcessoFacade {
             throw e;
         }
     }
+
     public static List<Processo> listaProcessosAdvogadoPromovente(Advogado advogado) throws DaoException {
         try {
             return processoDao.listaProcessosAdvogadoPromovente(advogado);
@@ -240,6 +241,7 @@ public class ProcessoFacade {
             throw e;
         }
     }
+
     public static List<Processo> listaProcessosAdvogadoPromovidoGanho(Advogado advogado) throws DaoException {
         try {
             return processoDao.listaProcessosAdvogadoPromovidoGanho(advogado);
@@ -253,6 +255,7 @@ public class ProcessoFacade {
             throw e;
         }
     }
+
     public static List<Processo> listaProcessosAdvogadoPromoventeGanho(Advogado advogado) throws DaoException {
         try {
             return processoDao.listaProcessosAdvogadoPromoventeGanho(advogado);

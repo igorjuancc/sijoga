@@ -4,6 +4,8 @@ import br.com.sijoga.bean.Advogado;
 import br.com.sijoga.bean.Endereco;
 import br.com.sijoga.bean.Estado;
 import br.com.sijoga.bean.Processo;
+import br.com.sijoga.exception.AdvogadoException;
+import br.com.sijoga.exception.EnderecoException;
 import br.com.sijoga.facade.AdvogadoFacade;
 import br.com.sijoga.facade.CidadeFacade;
 import br.com.sijoga.facade.ProcessoFacade;
@@ -49,39 +51,34 @@ public class AdvogadoMb implements Serializable {
                 this.estadoSelect.setCidades(CidadeFacade.listaCidadePorEstado(this.estadoSelect));
             }
         } catch (Exception e) {
-            try {
-                SijogaUtil.mensagemErroRedirecionamento(e);
-            } catch (IOException ex) {
-                Logger.getLogger(AdvogadoMb.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            e.printStackTrace(System.out);
+            String msg = "Problemas ao inicializar página " + FacesContext.getCurrentInstance().getViewRoot().getViewId();
+            SijogaUtil.mensagemErroRedirecionamento(msg);
         }
     }
 
     public void cadastrarAdvogado() {
+        FacesContext ctx = null;
         try {
             FacesMessage msg;
-            FacesContext ctx = FacesContext.getCurrentInstance();
-
+            ctx = FacesContext.getCurrentInstance();
             if (!this.advogado.getSenha().equals(this.confirmaSenha)) {
                 msg = SijogaUtil.emiteMsg("Senha e confirmação não conferem", 2);
                 ctx.addMessage(null, msg);
             } else {
-                List<String> mensagens = AdvogadoFacade.cadastrarAdvogado(this.advogado);
-                if (!mensagens.isEmpty()) {
-                    for (String print : mensagens) {
-                        msg = SijogaUtil.emiteMsg(print, 2);
-                        ctx.addMessage(null, msg);
-                    }
-                } else {
-                    this.cadastroConcluido = true;
-                }
+                AdvogadoFacade.cadastrarAdvogado(this.advogado);
+                this.cadastroConcluido = true;
+            }
+        } catch (AdvogadoException | EnderecoException e) {
+            if (ctx != null) {
+                ctx.addMessage(null, SijogaUtil.emiteMsg(e.getMessage(), 2));
+            } else {
+                e.printStackTrace(System.out);
+                SijogaUtil.mensagemErroRedirecionamento("Houve um problema ao cadastrar advogado");
             }
         } catch (Exception e) {
-            try {
-                SijogaUtil.mensagemErroRedirecionamento(e);
-            } catch (IOException ex) {
-                Logger.getLogger(AdvogadoMb.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            e.printStackTrace(System.out);
+            SijogaUtil.mensagemErroRedirecionamento("Houve um problema ao cadastrar advogado");
         }
     }
 
@@ -144,7 +141,7 @@ public class AdvogadoMb implements Serializable {
             }
         }
     }
-    
+
     public void redirecionar() {
         try {
             ExternalContext ctxExt = FacesContext.getCurrentInstance().getExternalContext();
@@ -157,7 +154,7 @@ public class AdvogadoMb implements Serializable {
             }
         }
     }
-    
+
     public void novaFase(int id) {
         try {
             ExternalContext ctxExt = FacesContext.getCurrentInstance().getExternalContext();
@@ -171,7 +168,7 @@ public class AdvogadoMb implements Serializable {
             }
         }
     }
-    
+
     public String printStatusProcesso(Processo p) {
         return SijogaUtil.printStatusProcesso(p);
     }

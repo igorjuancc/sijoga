@@ -2,99 +2,76 @@ package br.com.sijoga.facade;
 
 import br.com.sijoga.bean.Advogado;
 import br.com.sijoga.dao.AdvogadoDao;
+import br.com.sijoga.exception.AdvogadoException;
 import br.com.sijoga.exception.DaoException;
+import br.com.sijoga.exception.EnderecoException;
 import br.com.sijoga.util.Seguranca;
 import br.com.sijoga.util.SijogaUtil;
+import br.com.sijoga.validator.EnderecoValidator;
+import br.com.sijoga.validator.PessoaValidator;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class AdvogadoFacade {
 
     private static final AdvogadoDao advogadoDao = new AdvogadoDao();
 
-    public static List<String> cadastrarAdvogado(Advogado advogado) throws NoSuchAlgorithmException, DaoException {
+    public static void cadastrarAdvogado(Advogado advogado) throws AdvogadoException, EnderecoException {
         try {
-            List<String> mensagens = new ArrayList();
-            advogado.setCpf(advogado.getCpf().replace(".", "").replace("-", ""));
-            advogado.setNome(advogado.getNome().trim().toUpperCase());
-            if (advogado.getFone() != null) {
-                advogado.setFone(advogado.getFone().replace("(", "").replace(")", "").replace("-", ""));
+            if (advogado != null) {
+                advogado.setCpf((advogado.getCpf() != null) ? advogado.getCpf().replace(".", "").replace("-", "") : "");
+                advogado.setNome((advogado.getNome() != null) ? advogado.getNome().trim().toUpperCase() : "");
+                advogado.setFone((advogado.getFone() != null) ? advogado.getFone().replace("(", "").replace(")", "").replace("-", "") : null);
+                advogado.setEmail((advogado.getEmail() != null) ? advogado.getEmail().trim() : "");
+                advogado.setSenha((advogado.getSenha() != null) ? advogado.getSenha() : null);
+                if (advogado.getEndereco() != null) {
+                    advogado.getEndereco().setRua((advogado.getEndereco().getRua() != null) ? advogado.getEndereco().getRua().trim().toUpperCase() : null);
+                    advogado.getEndereco().setBairro((advogado.getEndereco().getBairro() != null) ? advogado.getEndereco().getBairro().trim().toUpperCase() : null);
+                    advogado.getEndereco().setCep((advogado.getEndereco().getCep() != null) ? advogado.getEndereco().getCep().replace(".", "").replace("-", "").trim() : null);
+                    advogado.getEndereco().setComplemento((advogado.getEndereco().getComplemento() != null) ? advogado.getEndereco().getComplemento().trim().toUpperCase() : "");
+                }
             }
-            advogado.setEmail(advogado.getEmail().trim());
+
+            PessoaValidator.validaAdvogado(advogado);
+            EnderecoValidator.validaEndereco(advogado.getEndereco());
             advogado.setSenha(Seguranca.md5(advogado.getSenha()));
 
-            advogado.getEndereco().setRua(advogado.getEndereco().getRua().trim().toUpperCase());
-            advogado.getEndereco().setBairro(advogado.getEndereco().getBairro().trim().toUpperCase());
-            advogado.getEndereco().setCep(advogado.getEndereco().getCep().replace(".", "").replace("-", "").trim());
-            if (advogado.getEndereco().getComplemento() != null) {
-                advogado.getEndereco().setComplemento(advogado.getEndereco().getComplemento().trim().toUpperCase());
+            if (PessoaFacade.buscarPessoaCpf(advogado.getCpf()) != null) {
+                throw new AdvogadoException("CPF já cadastrado");
             }
-
-            if (!SijogaUtil.isCPF(advogado.getCpf())) {
-                mensagens.add("CPF Inválido");
-            } else if (PessoaFacade.buscarPessoaCpf(advogado.getCpf()) != null) {
-                mensagens.add("CPF já cadastrado");
+            if (PessoaFacade.buscarPessoaEmail(advogado.getEmail()) != null) {
+                throw new AdvogadoException("Email já cadastrado");
             }
-            if (!Seguranca.isEmail(advogado.getEmail())) {
-                mensagens.add("Email Inválido");
-            } else if (PessoaFacade.buscarPessoaEmail(advogado.getEmail()) != null) {
-                mensagens.add("Email já cadastrado");
+            if ((advogadoDao.buscarAdvogadoOab(advogado.getRegistroOab()) != null) || (JuizFacade.buscarJuizOab(advogado.getRegistroOab()) != null)) {
+                throw new AdvogadoException("Número de registro da OAB já cadastrado");
             }
-            if (SijogaUtil.idade(advogado.getDataNascimento()) < 18) {
-                mensagens.add("Advogado não pode ser menor de idade");
-            }
-            if (advogado.getRegistroOab() == 0) {
-                mensagens.add("Numero de registro na OAB inválido");
-            } else if ((advogadoDao.buscarAdvogadoOab(advogado.getRegistroOab()) != null) || (JuizFacade.buscarJuizOab(advogado.getRegistroOab()) != null)) {
-                mensagens.add("Número de registro da OAB já cadastrado");
-            }
-
-            if (mensagens.isEmpty()) {
-                advogadoDao.cadastrarAdvogado(advogado);
-            }
-
-            return mensagens;
-        } catch (NoSuchAlgorithmException e) {
-            System.out.println("****Problemas com MD5 ao cadastrar novo advogado [Facade]****" + e);
-            e.printStackTrace();
-            throw e;
-        } catch (DaoException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            throw e;
-        } catch (Exception e) {
-            System.out.println("****Problemas ao cadastrar novo advogado [Facade]****" + e);
-            e.printStackTrace();
-            throw e;
+            advogadoDao.cadastrarAdvogado(advogado);
+        } catch (DaoException | NoSuchAlgorithmException e) {
+            e.printStackTrace(System.out);
+            String msg = "Houve um problema ao cadastrar os dados de advogado";
+            SijogaUtil.mensagemErroRedirecionamento(msg);
         }
     }
-    
-    public static Advogado buscarAdvogadoOab(int regOab) throws DaoException {
+
+    public static Advogado buscarAdvogadoOab(int regOab) {
         try {
             return advogadoDao.buscarAdvogadoOab(regOab);
         } catch (DaoException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            throw e;
-        } catch (Exception e) {
-            System.out.println("****Problema ao buscar advogado por OAB [Facade]****" + e);
-            e.printStackTrace();
-            throw e;
+            e.printStackTrace(System.out);
+            String msg = "Houve um problema ao buscar advogado por OAB";
+            SijogaUtil.mensagemErroRedirecionamento(msg);
+            return null;
         }
     }
-    
+
     public static List<Advogado> listaAdvogados() throws DaoException {
         try {
             return advogadoDao.listaAdvogados();
         } catch (DaoException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            throw e;
-        } catch (Exception e) {
-            System.out.println("****Problema ao buscar lista de advogados [Facade]****" + e);
-            e.printStackTrace();
-            throw e;
+            e.printStackTrace(System.out);
+            String msg = "Houve um problema ao buscar lista de advogados";
+            SijogaUtil.mensagemErroRedirecionamento(msg);
+            return null;
         }
     }
 }
