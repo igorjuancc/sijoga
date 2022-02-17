@@ -8,8 +8,7 @@ import br.com.sijoga.util.Seguranca;
 import br.com.sijoga.util.SijogaUtil;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.security.NoSuchAlgorithmException;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.ExternalContext;
@@ -86,12 +85,9 @@ public class LoginMb implements Serializable {
                     }
                     break;
             }
-        } catch (Exception e) {
-            try {
-                SijogaUtil.mensagemErroRedirecionamento(e);
-            } catch (IOException ex) {
-                Logger.getLogger(LoginMb.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        } catch (IOException | NoSuchAlgorithmException e) {
+            System.out.println(e.getMessage());
+            SijogaUtil.mensagemErroRedirecionamento("Houve um problema ao efetuar login");
         }
     }
 
@@ -102,12 +98,9 @@ public class LoginMb implements Serializable {
                 ctxExt.invalidateSession();
                 ctxExt.redirect(ctxExt.getRequestContextPath() + "/index.jsf");
             }
-        } catch (Exception e) {
-            try {
-                SijogaUtil.mensagemErroRedirecionamento(e);
-            } catch (IOException ex) {
-                Logger.getLogger(LoginMb.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            SijogaUtil.mensagemErroRedirecionamento("Houve um problema ao efetuar logout");
         }
     }
 

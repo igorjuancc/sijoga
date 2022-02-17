@@ -10,7 +10,7 @@ public class EnderecoValidator {
             throw new EnderecoException("Endereço inválido");
         } else {
             String mensagem = "";
-            if (endereco.getId() <= 0) {
+            if (endereco.getNumero() <= 0) {
                 mensagem += "Número do endereço inválido<br/>";
             }
             if ((endereco.getCep() == null)
