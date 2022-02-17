@@ -64,7 +64,7 @@ public class AdvogadoFacade {
         }
     }
 
-    public static List<Advogado> listaAdvogados() throws DaoException {
+    public static List<Advogado> listaAdvogados() {
         try {
             return advogadoDao.listaAdvogados();
         } catch (DaoException e) {

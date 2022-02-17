@@ -65,17 +65,14 @@ public class ParteFacade {
         }
     }
     
-    public static List<Parte> listaClientes() throws DaoException {
+    public static List<Parte> listaClientes() {
         try {
             return parteDao.listaClientes();
         } catch (DaoException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            throw e;
-        } catch (Exception e) {
-            System.out.println("****Problema ao buscar lista de clientes [Facade]****" + e);
-            e.printStackTrace();
-            throw e;
+            e.printStackTrace(System.out);
+            String msg = "Houve um problema ao buscar lista de clientes";
+            SijogaUtil.mensagemErroRedirecionamento(msg);
+            return null;
         }
     }
 

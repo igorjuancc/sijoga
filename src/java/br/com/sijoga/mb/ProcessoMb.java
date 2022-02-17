@@ -4,9 +4,12 @@ import br.com.sijoga.bean.Advogado;
 import br.com.sijoga.bean.FaseProcesso;
 import br.com.sijoga.bean.Parte;
 import br.com.sijoga.bean.Processo;
-import br.com.sijoga.dto.EnderecoDto;
 import br.com.sijoga.dto.IntimacaoDto;
 import br.com.sijoga.dto.OficialDto;
+import br.com.sijoga.exception.ArquivoException;
+import br.com.sijoga.exception.DocumentoException;
+import br.com.sijoga.exception.FaseException;
+import br.com.sijoga.exception.ProcessoException;
 import br.com.sijoga.facade.AdvogadoFacade;
 import br.com.sijoga.facade.FaseProcessoFacade;
 import br.com.sijoga.facade.IntimacaoFacade;
@@ -17,10 +20,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
-import javax.faces.application.FacesMessage;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
@@ -50,7 +50,6 @@ public class ProcessoMb implements Serializable {
     public void init() {
         try {
             FacesContext ctx = FacesContext.getCurrentInstance();
-
             switch (ctx.getViewRoot().getViewId()) {
                 case "/Advogado/CadastroProcesso.xhtml":
                     this.processo = new Processo();
@@ -115,58 +114,49 @@ public class ProcessoMb implements Serializable {
                     }
                     break;
             }
-        } catch (Exception e) {
-            try {
-                SijogaUtil.mensagemErroRedirecionamento(e);
-            } catch (IOException ex) {
-                Logger.getLogger(ProcessoMb.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        } catch (IOException e) {
+            e.printStackTrace(System.out);
+            String msg = "Problemas ao inicializar página " + FacesContext.getCurrentInstance().getViewRoot().getViewId();
+            SijogaUtil.mensagemErroRedirecionamento(msg);
         }
     }
 
     public void cadastrarProcesso() {
         try {
-            FacesMessage msg;
+            ProcessoFacade.cadastrarProcesso(this.processo, this.arquivo);
+            this.cadastroConcluido = true;
+        } catch (DocumentoException | FaseException | ProcessoException e) {
             FacesContext ctx = FacesContext.getCurrentInstance();
-
-            List<String> mensagens = ProcessoFacade.cadastrarProcesso(this.processo, this.arquivo);
-            if (!mensagens.isEmpty()) {
-                for (String print : mensagens) {
-                    msg = SijogaUtil.emiteMsg(print, 2);
-                    ctx.addMessage(null, msg);
-                }
+            if (ctx != null) {
+                ctx.addMessage(null, SijogaUtil.emiteMsg(e.getMessage(), 2));
             } else {
-                this.cadastroConcluido = true;
+                e.printStackTrace(System.out);
+                SijogaUtil.mensagemErroRedirecionamento("Houve um problema ao cadastrar processo");
             }
         } catch (Exception e) {
-            try {
-                SijogaUtil.mensagemErroRedirecionamento(e);
-            } catch (IOException ex) {
-                Logger.getLogger(ProcessoMb.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            e.printStackTrace(System.out);
+            SijogaUtil.mensagemErroRedirecionamento("Houve um problema ao cadastrar processo");
         }
     }
 
     public void cadastrarFaseProcesso() {
         try {
-            FacesMessage msg;
+            FaseProcessoFacade.cadastrarFaseProcesso(this.faseProcesso, this.arquivo);
+            this.cadastroConcluido = true;
+        } catch (DocumentoException | FaseException e) {
             FacesContext ctx = FacesContext.getCurrentInstance();
-
-            List<String> mensagens = FaseProcessoFacade.cadastrarFaseProcesso(this.faseProcesso, this.arquivo);
-            if (!mensagens.isEmpty()) {
-                for (String print : mensagens) {
-                    msg = SijogaUtil.emiteMsg(print, 2);
-                    ctx.addMessage(null, msg);
-                }
+            if (ctx != null) {
+                ctx.addMessage(null, SijogaUtil.emiteMsg(e.getMessage(), 2));
             } else {
-                this.cadastroConcluido = true;
+                e.printStackTrace(System.out);
+                SijogaUtil.mensagemErroRedirecionamento("Houve um problema ao cadastrar fase do processo");
             }
+        } catch (ArquivoException e) {
+            e.printStackTrace(System.out);
+            SijogaUtil.mensagemErroRedirecionamento(e.getMessage());
         } catch (Exception e) {
-            try {
-                SijogaUtil.mensagemErroRedirecionamento(e);
-            } catch (IOException ex) {
-                Logger.getLogger(ProcessoMb.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            e.printStackTrace(System.out);
+            SijogaUtil.mensagemErroRedirecionamento("Houve um problema ao cadastrar fase do processo");
         }
     }
 
@@ -175,12 +165,9 @@ public class ProcessoMb implements Serializable {
             ExternalContext ctxExt = FacesContext.getCurrentInstance().getExternalContext();
             FacesContext.getCurrentInstance().getExternalContext().getFlash().put("idFase", id);
             ctxExt.redirect(ctxExt.getRequestContextPath() + "/Advogado/VisualizarFase.jsf");
-        } catch (Exception e) {
-            try {
-                SijogaUtil.mensagemErroRedirecionamento(e);
-            } catch (IOException ex) {
-                Logger.getLogger(ProcessoMb.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        } catch (IOException e) {
+            e.printStackTrace(System.out);
+            SijogaUtil.mensagemErroRedirecionamento("Houve um problema ao visualizar dados da fase do processo");
         }
     }
 
@@ -202,70 +189,41 @@ public class ProcessoMb implements Serializable {
                     ctxExt.redirect(ctxExt.getRequestContextPath() + "/Juiz/VisualizarProcesso.jsf");
                     break;
             }
-        } catch (Exception e) {
-            try {
-                SijogaUtil.mensagemErroRedirecionamento(e);
-            } catch (IOException ex) {
-                Logger.getLogger(ProcessoMb.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        } catch (IOException e) {
+            e.printStackTrace(System.out);
+            SijogaUtil.mensagemErroRedirecionamento("Houve um problema ao atualizar fase do processo");
         }
     }
 
     public void encerrarProcesso() {
         try {
-            String mensagem = ProcessoFacade.finalizarProcesso(this.processo);
-            if (mensagem != null) {
-                FacesContext ctx = FacesContext.getCurrentInstance();
-                FacesMessage msg = SijogaUtil.emiteMsg(mensagem, 2);
-                ctx.addMessage(null, msg);
+            ProcessoFacade.finalizarProcesso(this.processo);
+            ExternalContext ctxExt = FacesContext.getCurrentInstance().getExternalContext();
+            FacesContext.getCurrentInstance().getExternalContext().getFlash().put("idProcesso", this.processo.getId());
+            ctxExt.redirect(ctxExt.getRequestContextPath() + "/Juiz/VisualizarProcesso.jsf");
+        } catch (ProcessoException e) {
+            FacesContext ctx = FacesContext.getCurrentInstance();
+            if (ctx != null) {
+                ctx.addMessage(null, SijogaUtil.emiteMsg(e.getMessage(), 2));
             } else {
-                ExternalContext ctxExt = FacesContext.getCurrentInstance().getExternalContext();
-                FacesContext.getCurrentInstance().getExternalContext().getFlash().put("idProcesso", this.processo.getId());
-                ctxExt.redirect(ctxExt.getRequestContextPath() + "/Juiz/VisualizarProcesso.jsf");
+                e.printStackTrace(System.out);
+                SijogaUtil.mensagemErroRedirecionamento("Houve um problema ao finalizar processo");
             }
-        } catch (Exception e) {
-            try {
-                SijogaUtil.mensagemErroRedirecionamento(e);
-            } catch (IOException ex) {
-                Logger.getLogger(ProcessoMb.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        } catch (IOException e) {
+            e.printStackTrace(System.out);
+            SijogaUtil.mensagemErroRedirecionamento("Houve um problema ao finalizar processo");
         }
     }
 
     public void criarIntimacao() {
         try {
-            FacesMessage msg;
-            FacesContext ctx = FacesContext.getCurrentInstance();
-            
-            this.intimacao.setCpf(this.intimado.getCpf());
-            this.intimacao.setEndereco(new EnderecoDto());
-            this.intimacao.getEndereco().setBairro(this.intimado.getEndereco().getBairro());
-            this.intimacao.getEndereco().setCep(this.intimado.getEndereco().getCep());            
-            this.intimacao.getEndereco().setCidade(this.intimado.getEndereco().getCidade().getId());
-            this.intimacao.getEndereco().setComplemento(this.intimado.getEndereco().getComplemento());
-            this.intimacao.getEndereco().setNumero(this.intimado.getEndereco().getNumero());
-            this.intimacao.getEndereco().setRua(this.intimado.getEndereco().getRua());
-            this.intimacao.setCpf(this.intimado.getCpf());
-            this.intimacao.setNome(this.intimado.getNome());
-            this.intimacao.setProcesso(this.processo.getId());
-            
-            List<String> mensagens = IntimacaoFacade.cadastrarIntimacao(this.intimacao);
-            if (!mensagens.isEmpty()) {
-                for (String print : mensagens) {
-                    msg = SijogaUtil.emiteMsg(print, 2);
-                    ctx.addMessage(null, msg);
-                }
-            } else {
-                ExternalContext ctxExt = FacesContext.getCurrentInstance().getExternalContext();
-                FacesContext.getCurrentInstance().getExternalContext().getFlash().put("idProcesso", this.processo.getId());
-                ctxExt.redirect(ctxExt.getRequestContextPath() + "/Juiz/VisualizarProcesso.jsf");                
-            }
-        } catch (Exception e) {
-            try {
-                SijogaUtil.mensagemErroRedirecionamento(e);
-            } catch (IOException ex) {
-                Logger.getLogger(ProcessoMb.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            this.intimacao.setProcesso((this.processo != null) ? this.processo.getId() : 0);
+            ExternalContext ctxExt = FacesContext.getCurrentInstance().getExternalContext();
+            FacesContext.getCurrentInstance().getExternalContext().getFlash().put("idProcesso", this.processo.getId());
+            ctxExt.redirect(ctxExt.getRequestContextPath() + "/Juiz/VisualizarProcesso.jsf");
+        } catch (IOException e) {
+            e.printStackTrace(System.out);
+            SijogaUtil.mensagemErroRedirecionamento("Houve um problema ao criar intimação");
         }
     }
 

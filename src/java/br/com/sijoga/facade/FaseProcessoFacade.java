@@ -3,127 +3,83 @@ package br.com.sijoga.facade;
 import br.com.sijoga.bean.Documento;
 import br.com.sijoga.bean.FaseProcesso;
 import br.com.sijoga.dao.FaseProcessoDao;
+import br.com.sijoga.exception.ArquivoException;
 import br.com.sijoga.exception.DaoException;
+import br.com.sijoga.exception.DocumentoException;
+import br.com.sijoga.exception.FaseException;
 import br.com.sijoga.util.SijogaUtil;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
+import br.com.sijoga.validator.ProcessoValidator;
 import java.util.Date;
-import java.util.List;
 import org.primefaces.model.UploadedFile;
 
 public class FaseProcessoFacade {
 
     private static final FaseProcessoDao faseProcessoDao = new FaseProcessoDao();
 
-    public static List<String> cadastrarFaseProcesso(FaseProcesso faseProcesso, UploadedFile arquivo) throws NoSuchAlgorithmException, DaoException {
+    public static void cadastrarFaseProcesso(FaseProcesso faseProcesso, UploadedFile arquivo) throws ArquivoException, DocumentoException, FaseException {
         try {
-            List<String> mensagens = new ArrayList();
             Date dataHoje = new Date();
             faseProcesso.setDataHora(dataHoje);
-            
+
             if ((faseProcesso.getProcesso().getFases() != null) && (!faseProcesso.getProcesso().getFases().isEmpty())) {
                 if ((faseProcesso.getProcesso().getFases().get(faseProcesso.getProcesso().getFases().size() - 1).getTipo() == 2)
                         && (faseProcesso.getProcesso().getFases().get(faseProcesso.getProcesso().getFases().size() - 1).getJustificativa() == null)) {
-                    mensagens.add("Processo aguardando resposta do juiz");
+                    throw new FaseException("Processo aguardando resposta do juiz");
                 }
-            } 
+            }
             if (faseProcesso.getProcesso().getVencedor() != null) {
-                mensagens.add("Processo já foi finalizado, impossivel adicionar novas fases!");
+                throw new FaseException("Processo já foi finalizado, impossivel adicionar novas fases!");
             } else {
-                if ((faseProcesso.getTipo() != 1) && (faseProcesso.getTipo() != 2)) {
-                    mensagens.add("Fase de processo inválida");
-                }
-
-                if ((faseProcesso.getTitulo() == null)) {
-                    mensagens.add("Necessário inserir um título fase do processo");
-                } else {
-                    faseProcesso.setTitulo(faseProcesso.getTitulo().trim().toUpperCase());
-                    if (("".equals(faseProcesso.getTitulo())) || " ".equals(faseProcesso.getTitulo())) {
-                        mensagens.add("Titulo inválido");
-                    }
-                }
-
-                if ((faseProcesso.getDescricao() == null)) {
-                    mensagens.add("Necessário inserir uma descrição para a primeira fase do processo");
-                } else {
-                    faseProcesso.setDescricao(faseProcesso.getDescricao().trim().toUpperCase());
-                    if (("".equals(faseProcesso.getDescricao())) || " ".equals(faseProcesso.getDescricao())) {
-                        mensagens.add("Descrição do processo inválida");
-                    }
-                }
-
-                if ((faseProcesso.getAdvogado() == null) || faseProcesso.getAdvogado().getId() == 0) {
-                    mensagens.add("Necessário um advogado para criação de fase do processo");
-                }
+                faseProcesso.setTitulo((faseProcesso.getTitulo() != null) ? faseProcesso.getTitulo().trim().toUpperCase() : null);
+                faseProcesso.setDescricao((faseProcesso.getDescricao() != null) ? faseProcesso.getDescricao().trim().toUpperCase() : null);
+                ProcessoValidator.validaFase(faseProcesso);
 
                 if ((faseProcesso.getProcesso() == null) || (faseProcesso.getProcesso().getId() == 0)) {
-                    mensagens.add("Necessário o número do processo para criação de uma nova fase");
+                    throw new FaseException("Necessário o número do processo para criação de uma nova fase");
                 }
-
                 if (arquivo != null) {
+                    ProcessoValidator.validaDocumento(arquivo);
                     faseProcesso.setDocumento(new Documento());
                     faseProcesso.getDocumento().setExtensao(".pdf");
-
-                    if (arquivo.getSize() > 2097152) {
-                        mensagens.add("Tamanho do arquivo maior que 2MB");
-                    }
-                    if (!"application/pdf".equals(arquivo.getContentType())) {
-                        mensagens.add("Formato de arquivo inválido");
-                    }
                 }
 
-                if (mensagens.isEmpty()) {
-                    faseProcessoDao.cadastrarFaseProcesso(faseProcesso);
-                    if (arquivo != null) {
-                        if (!salvarArquivoFase(faseProcesso, arquivo)) {
-                            mensagens.add("Problemas ao gravar arquivo");
-                        }
+                faseProcessoDao.cadastrarFaseProcesso(faseProcesso);
+                if (arquivo != null) {
+                    if (!salvarArquivoFase(faseProcesso, arquivo)) {
+                        throw new ArquivoException("Problemas ao gravar documento de processo");
                     }
                 }
             }
-
-            return mensagens;
         } catch (DaoException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            throw e;
-        } catch (Exception e) {
-            System.out.println("****Problemas ao cadastrar nova fase do processo [Facade]****" + e);
-            e.printStackTrace();
-            throw e;
+            e.printStackTrace(System.out);
+            String msg = "Houve um problema ao cadastrar nova fase do processo";
+            SijogaUtil.mensagemErroRedirecionamento(msg);
         }
     }
 
-    public static FaseProcesso buscaFaseProcessoId(int id) throws DaoException {
+    public static FaseProcesso buscaFaseProcessoId(int id) {
         try {
             return faseProcessoDao.buscaFaseProcessoId(id);
         } catch (DaoException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            throw e;
-        } catch (Exception e) {
-            System.out.println("****Problema ao buscar fase de processo por id [Facade]****" + e);
-            e.printStackTrace();
-            throw e;
+            e.printStackTrace(System.out);
+            String msg = "Houve um problema ao buscar fase de processo por id";
+            SijogaUtil.mensagemErroRedirecionamento(msg);
+            return null;
         }
     }
 
-    public static void atualizarFaseProcesso(FaseProcesso fase) throws DaoException {
+    public static void atualizarFaseProcesso(FaseProcesso fase) {
         try {
             faseProcessoDao.atualizarFaseProcesso(fase);
         } catch (DaoException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            throw e;
-        } catch (Exception e) {
-            System.out.println("****Problema ao atualizar fase de processo por id [Facade]****" + e);
-            e.printStackTrace();
-            throw e;
+            e.printStackTrace(System.out);
+            String msg = "Houve um problema ao atualizar fase de processo por id";
+            SijogaUtil.mensagemErroRedirecionamento(msg);
         }
     }
 
     public static Boolean salvarArquivoFase(FaseProcesso faseProcesso, UploadedFile arquivo) {
-        String caminho = "D:\\Documentos\\UFPR\\Aulas\\2020\\DAC\\SIJOGA\\web\\Documentos";
+        String caminho = SijogaUtil.caminhoProjeto() + "Documentos\\";
         String nomeArquivo = Integer.toString(faseProcesso.getDocumento().getId()) + faseProcesso.getDocumento().getExtensao();
         return SijogaUtil.salvarArquivo(arquivo, caminho, nomeArquivo);
     }

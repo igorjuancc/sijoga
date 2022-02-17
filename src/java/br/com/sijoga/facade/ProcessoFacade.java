@@ -6,10 +6,13 @@ import br.com.sijoga.bean.Juiz;
 import br.com.sijoga.bean.Parte;
 import br.com.sijoga.bean.Processo;
 import br.com.sijoga.dao.ProcessoDao;
+import br.com.sijoga.exception.ArquivoException;
 import br.com.sijoga.exception.DaoException;
+import br.com.sijoga.exception.DocumentoException;
+import br.com.sijoga.exception.FaseException;
+import br.com.sijoga.exception.ProcessoException;
 import br.com.sijoga.util.SijogaUtil;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
+import br.com.sijoga.validator.ProcessoValidator;
 import java.util.Date;
 import java.util.List;
 import org.primefaces.model.UploadedFile;
@@ -18,132 +21,72 @@ public class ProcessoFacade {
 
     private static final ProcessoDao processoDao = new ProcessoDao();
 
-    public static List<String> cadastrarProcesso(Processo processo, UploadedFile arquivo) throws NoSuchAlgorithmException, DaoException {
+    public static void cadastrarProcesso(Processo processo, UploadedFile arquivo) throws DocumentoException, FaseException, ProcessoException {
         try {
-            List<String> mensagens = new ArrayList();
             Date dataHoje = new Date();
             FaseProcesso fase1 = processo.getFases().get(0);
 
-            if ((processo.getAdvogadoPromovente() == null) || (processo.getAdvogadoPromovente().getId() == 0)) {
-                mensagens.add("Advogado promovente inválido");
-            }
-            if ((processo.getAdvogadoPromovido() == null) || (processo.getAdvogadoPromovido().getId() == 0)) {
-                mensagens.add("Advogado promovido inválido");
-            }
-            if ((processo.getAdvogadoPromovente() != null) && (processo.getAdvogadoPromovido() != null)) {
-                if (processo.getAdvogadoPromovente().getId() == processo.getAdvogadoPromovido().getId()) {
-                    mensagens.add("Um advogado não pode representar as duas partes");
-                }
-            }
-            if ((processo.getPromovente() == null) || (processo.getPromovente().getId() == 0)) {
-                mensagens.add("Parte promovente inválida");
-            }
-            if ((processo.getPromovido() == null) || (processo.getPromovido().getId() == 0)) {
-                mensagens.add("Parte promovida inválida");
-            }
-            if ((processo.getPromovente() != null) && (processo.getPromovido() != null)) {
-                if (processo.getPromovente().getId() == processo.getPromovido().getId()) {
-                    mensagens.add("As partes não podem ser iguais");
-                }
-            }
+            ProcessoValidator.validaProcesso(processo);
 
-            if ((processo.getFases() == null) || (processo.getFases().isEmpty())) {
-                mensagens.add("Necessário uma fase para iniciar o processo");
-            } else {
+            if (fase1 != null) {
                 fase1.setDataHora(dataHoje);
                 fase1.setTipo(1);
-
-                if ((fase1.getTitulo() == null)) {
-                    mensagens.add("Necessário inserir um título para a primeira fase do processo");
-                } else {
-                    fase1.setTitulo(fase1.getTitulo().trim().toUpperCase());
-                    if (("".equals(fase1.getTitulo())) || " ".equals(fase1.getTitulo())) {
-                        mensagens.add("Titulo inválido");
-                    }
-                }
-
-                if ((fase1.getDescricao() == null)) {
-                    mensagens.add("Necessário inserir uma descrição para a primeira fase do processo");
-                } else {
-                    fase1.setDescricao(fase1.getDescricao().trim().toUpperCase());
-                    if (("".equals(fase1.getDescricao())) || " ".equals(fase1.getDescricao())) {
-                        mensagens.add("Descrição do processo inválida");
-                    }
-                }
-
-                if ((fase1.getAdvogado() == null) || fase1.getAdvogado().getId() == 0) {
-                    mensagens.add("Necessário um advogado para criação da primeira fase do processo");
-                }
-
-                if (arquivo != null) {
-                    if (arquivo.getSize() > 2097152) {
-                        mensagens.add("Tamanho do arquivo maior que 2MB");
-                    }
-                    if (!"application/pdf".equals(arquivo.getContentType())) {
-                        mensagens.add("Formato de arquivo inválido");
-                    }
-                }
+                fase1.setTitulo((fase1.getTitulo() != null) ? fase1.getTitulo().trim().toUpperCase() : null);
+                fase1.setDescricao((fase1.getDescricao() != null) ? fase1.getDescricao().trim().toUpperCase() : null);
             }
 
-            if (mensagens.isEmpty()) {
-                processo.setDataInicio(dataHoje);
-                processo.setJuiz(JuizFacade.buscarJuizProcessos()); //Buscar juiz com menos processos em aberto
-                processo.getFases().remove(0);
-                processoDao.cadastrarProcesso(processo);
-                fase1.setProcesso(processo);
-                mensagens = FaseProcessoFacade.cadastrarFaseProcesso(fase1, arquivo);
+            ProcessoValidator.validaFase(fase1);
+            if (arquivo != null) {
+                ProcessoValidator.validaDocumento(arquivo);
             }
 
-            return mensagens;
+            processo.setDataInicio(dataHoje);
+            processo.setJuiz(JuizFacade.buscarJuizProcessos()); //Buscar juiz com menos processos em aberto
+            processo.getFases().remove(0);
+            processoDao.cadastrarProcesso(processo);
+
+            fase1.setProcesso(processo);
+            FaseProcessoFacade.cadastrarFaseProcesso(fase1, arquivo);
         } catch (DaoException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            throw e;
-        } catch (Exception e) {
-            System.out.println("****Problemas ao cadastrar novo processo [Facade]****" + e);
-            e.printStackTrace();
-            throw e;
+            e.printStackTrace(System.out);
+            String msg = "Houve um problema ao salvar novo processo";
+            SijogaUtil.mensagemErroRedirecionamento(msg);
+        } catch (ArquivoException ex) {
+            ex.printStackTrace(System.out);
+            SijogaUtil.mensagemErroRedirecionamento(ex.getMessage());
         }
     }
 
-    public static String finalizarProcesso(Processo processo) throws DaoException {
+    public static void finalizarProcesso(Processo processo) throws ProcessoException {
         try {
             if (processo.getParecer() == null) {
-                return "Necessário um parecer para encerrar o processo";
+                throw new ProcessoException("Necessário um parecer para encerrar o processo");
             } else if (processo.getParecer().trim().equals("")) {
-                return "Parecer inválido";
+                throw new ProcessoException("Parecer inválido");
             } else if ((processo.getVencedor() == null) || (processo.getVencedor().getId() == 0)) {
-                return "Necessário indicar o vencedor do processo";
+                throw new ProcessoException("Necessário indicar o vencedor do processo");
             } else if ((processo.getVencedor().getId() != processo.getPromovente().getId())
                     && (processo.getVencedor().getId() != processo.getPromovido().getId())) {
-                return "Vencedor do processo inválido";
+                throw new ProcessoException("Vencedor do processo inválido");
             } else {
                 processo.setParecer(processo.getParecer().toUpperCase());
                 processoDao.atualizarProcesso(processo);
-                return null;
             }
         } catch (DaoException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            throw e;
-        } catch (Exception e) {
-            System.out.println("****Problema ao finalizar processo [Facade]****" + e);
-            e.printStackTrace();
-            throw e;
+            e.printStackTrace(System.out);
+            String msg = "Houve um problema ao finalizar processo";
+            SijogaUtil.mensagemErroRedirecionamento(msg);
         }
     }
 
-    public static Processo buscaProcessoId(int id) throws DaoException {
+    public static Processo buscaProcessoId(int id) {
         try {
             return processoDao.buscaProcessoId(id);
         } catch (DaoException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            throw e;
-        } catch (Exception e) {
-            System.out.println("****Problema ao buscar processo por id [Facade]****" + e);
-            e.printStackTrace();
-            throw e;
+            e.printStackTrace(System.out);
+            String msg = "Houve um problema ao buscar processo por id";
+            SijogaUtil.mensagemErroRedirecionamento(msg);
+            return null;
         }
     }
 
@@ -169,17 +112,14 @@ public class ProcessoFacade {
         }
     }
 
-    public static List<Processo> listaTodosProcessosParte(Parte parte) throws DaoException {
+    public static List<Processo> listaTodosProcessosParte(Parte parte) {
         try {
             return processoDao.listaTodosProcessosParte(parte);
         } catch (DaoException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            throw e;
-        } catch (Exception e) {
-            System.out.println("****Problema ao listar processos de parte [Facade]****" + e);
-            e.printStackTrace();
-            throw e;
+            e.printStackTrace(System.out);
+            String msg = "Houve um problema ao listar processos de parte";
+            SijogaUtil.mensagemErroRedirecionamento(msg);
+            return null;
         }
     }
 
