@@ -18,6 +18,7 @@ import javax.faces.context.FacesContext;
 import org.primefaces.model.UploadedFile;
 
 public class SijogaUtil {
+
     //Validação CPF
     public static boolean isCPF(String CPF) {
         // considera-se erro CPF's formados por uma sequencia de numeros iguais
@@ -97,7 +98,7 @@ public class SijogaUtil {
         idade = dataHoje.get(Calendar.YEAR) - dataNascimento.get(Calendar.YEAR);
         return idade;
     }
-    
+
     //Emissão de msg primeface
     public static FacesMessage emiteMsg(String mensagem, int tipo) {
         FacesMessage msg = null;
@@ -125,14 +126,14 @@ public class SijogaUtil {
         } catch (IOException ex) {
             Logger.getLogger(SijogaUtil.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }    
-    
+    }
+
     //Data formatada para impressão
     public static String formataData(Date data) {
         SimpleDateFormat fmt = new SimpleDateFormat("dd/MM/yyyy");
         return fmt.format(data);
     }
-   
+
     //Imprime fone
     public static String imprimeFone(String fon) {
         try {
@@ -142,7 +143,7 @@ public class SijogaUtil {
             return null;
         }
     }
-    
+
     //Salvar arquivo em pasta
     public static Boolean salvarArquivo(UploadedFile arquivo, String local, String nomeArquivo) {
         Boolean concluido = false;
@@ -180,25 +181,23 @@ public class SijogaUtil {
             return false;
         }
     }
-    
+
     public static String printStatusProcesso(Processo p) {
         String rtn = "EM ABERTO";
-        try {            
+        try {
             if (p.getVencedor() != null) {
                 rtn = "ENCERRADO";
             } else if ((p.getFases() != null) && (!p.getFases().isEmpty())) {
-                if (((p.getFases().get(p.getFases().size()-1)).getTipo() == 2)
-                        && ((p.getFases().get(p.getFases().size()-1)).getJustificativa() == null)) {
-                    rtn = "FASE DELIBERATIVA";                    
-                }                               
-            } 
-        } catch (Exception e) {
-            try {
-                SijogaUtil.mensagemErroRedirecionamento(e);
-            } catch (IOException ex) {
-                Logger.getLogger(SijogaUtil.class.getName()).log(Level.SEVERE, null, ex);
+                if (((p.getFases().get(p.getFases().size() - 1)).getTipo() == 2)
+                        && ((p.getFases().get(p.getFases().size() - 1)).getJustificativa() == null)) {
+                    rtn = "FASE DELIBERATIVA";
+                }
             }
-        }        
-        return rtn;
+            return rtn;
+        } catch (Exception e) {
+            e.printStackTrace(System.out);
+            SijogaUtil.mensagemErroRedirecionamento("Houve um problema ao imprimir status do processo");
+            return null;
+        }
     }
 }

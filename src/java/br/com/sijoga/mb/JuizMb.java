@@ -4,6 +4,8 @@ import br.com.sijoga.bean.Endereco;
 import br.com.sijoga.bean.Estado;
 import br.com.sijoga.bean.Juiz;
 import br.com.sijoga.bean.Processo;
+import br.com.sijoga.exception.EnderecoException;
+import br.com.sijoga.exception.JuizException;
 import br.com.sijoga.facade.CidadeFacade;
 import br.com.sijoga.facade.JuizFacade;
 import br.com.sijoga.facade.ProcessoFacade;
@@ -11,8 +13,6 @@ import br.com.sijoga.util.SijogaUtil;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.ExternalContext;
@@ -24,7 +24,7 @@ import javax.inject.Named;
 @Named
 @ViewScoped
 public class JuizMb implements Serializable {
-    
+
     @Inject
     private LoginMb login;
     private String confirmaSenha;
@@ -48,39 +48,35 @@ public class JuizMb implements Serializable {
                 this.estadoSelect.setCidades(CidadeFacade.listaCidadePorEstado(this.estadoSelect));
             }
         } catch (Exception e) {
-            try {
-                SijogaUtil.mensagemErroRedirecionamento(e);
-            } catch (IOException ex) {
-                Logger.getLogger(JuizMb.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            e.printStackTrace(System.out);
+            String msg = "Problemas ao inicializar página " + FacesContext.getCurrentInstance().getViewRoot().getViewId();
+            SijogaUtil.mensagemErroRedirecionamento(msg);
         }
     }
 
     public void cadastrarJuiz() {
+        FacesContext ctx = null;
         try {
             FacesMessage msg;
-            FacesContext ctx = FacesContext.getCurrentInstance();
+            ctx = FacesContext.getCurrentInstance();
 
             if (!this.juiz.getSenha().equals(this.confirmaSenha)) {
                 msg = SijogaUtil.emiteMsg("Senha e confirmação não conferem", 2);
                 ctx.addMessage(null, msg);
             } else {
-                List<String> mensagens = JuizFacade.cadastrarJuiz(this.juiz);
-                if (!mensagens.isEmpty()) {
-                    for (String print : mensagens) {
-                        msg = SijogaUtil.emiteMsg(print, 2);
-                        ctx.addMessage(null, msg);
-                    }
-                } else {
-                    this.cadastroConcluido = true;
-                }
+                JuizFacade.cadastrarJuiz(this.juiz);
+                this.cadastroConcluido = true;
+            }
+        } catch (EnderecoException | JuizException e) {
+            if (ctx != null) {
+                ctx.addMessage(null, SijogaUtil.emiteMsg(e.getMessage(), 2));
+            } else {
+                e.printStackTrace(System.out);
+                SijogaUtil.mensagemErroRedirecionamento("Houve um problema ao cadastrar juiz");
             }
         } catch (Exception e) {
-            try {
-                SijogaUtil.mensagemErroRedirecionamento(e);
-            } catch (IOException ex) {
-                Logger.getLogger(JuizMb.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            e.printStackTrace(System.out);
+            SijogaUtil.mensagemErroRedirecionamento("Houve um problema ao cadastrar juiz");
         }
     }
 
@@ -88,41 +84,32 @@ public class JuizMb implements Serializable {
         try {
             this.estadoSelect.setCidades(CidadeFacade.listaCidadePorEstado(this.estadoSelect));
         } catch (Exception e) {
-            try {
-                SijogaUtil.mensagemErroRedirecionamento(e);
-            } catch (IOException ex) {
-                Logger.getLogger(JuizMb.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            e.printStackTrace(System.out);
+            SijogaUtil.mensagemErroRedirecionamento("Houve um problema ao buscar dados de cidades");
         }
     }
-    
+
     public void verProcesso(int id) {
         try {
             ExternalContext ctxExt = FacesContext.getCurrentInstance().getExternalContext();
             FacesContext.getCurrentInstance().getExternalContext().getFlash().put("idProcesso", id);
             ctxExt.redirect(ctxExt.getRequestContextPath() + "/Juiz/VisualizarProcesso.jsf");
-        } catch (Exception e) {
-            try {
-                SijogaUtil.mensagemErroRedirecionamento(e);
-            } catch (IOException ex) {
-                Logger.getLogger(AdvogadoMb.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        } catch (IOException e) {
+            e.printStackTrace(System.out);
+            SijogaUtil.mensagemErroRedirecionamento("Houve um problema ao visualizar detalhes do processo");
         }
     }
-    
+
     public void redirecionar() {
         try {
             ExternalContext ctxExt = FacesContext.getCurrentInstance().getExternalContext();
             ctxExt.redirect(ctxExt.getRequestContextPath() + "/index.jsf");
-        } catch (Exception e) {
-            try {
-                SijogaUtil.mensagemErroRedirecionamento(e);
-            } catch (IOException ex) {
-                Logger.getLogger(AdvogadoMb.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        } catch (IOException e) {
+            e.printStackTrace(System.out);
+            SijogaUtil.mensagemErroRedirecionamento("Houve um problema ao redirecionar página");
         }
     }
-    
+
     public String printStatusProcesso(Processo p) {
         return SijogaUtil.printStatusProcesso(p);
     }

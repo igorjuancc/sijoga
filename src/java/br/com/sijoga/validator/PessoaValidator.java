@@ -1,8 +1,10 @@
 package br.com.sijoga.validator;
 
 import br.com.sijoga.bean.Advogado;
+import br.com.sijoga.bean.Juiz;
 import br.com.sijoga.bean.Pessoa;
 import br.com.sijoga.exception.AdvogadoException;
+import br.com.sijoga.exception.JuizException;
 import br.com.sijoga.util.Seguranca;
 import br.com.sijoga.util.SijogaUtil;
 import java.util.Date;
@@ -74,6 +76,35 @@ public class PessoaValidator {
             }
             if (!mensagem.equals("")) {
                 throw new AdvogadoException(mensagem);
+            }
+        }
+    }
+    
+    public static void validaJuiz(Juiz juiz) throws JuizException {
+        if (juiz == null) {
+            throw new JuizException("Juiz inválido");
+        } else {
+            String mensagem = validaPessoa(juiz);
+            if (SijogaUtil.idade(juiz.getDataNascimento()) < 18) {
+                mensagem += "O juiz não pode ser menor de idade<br/>";
+            }
+            if (juiz.getRegistroOab() == 0) {
+                mensagem += "Numero de registro na OAB inválido<br/>";
+            }
+            if ((juiz.getSenha() == null)
+                    || (juiz.getSenha().isEmpty())
+                    || (juiz.getSenha().trim().equals(""))) {
+                mensagem += "Senha inválida<br/>";
+            } else {
+                if (juiz.getSenha().length() < 5) {
+                    mensagem += "Senha inválida, Mínimo [5] caracteres<br/>";
+                }
+                if (juiz.getSenha().length() > 100) {
+                    mensagem += "Senha inválida, Máximo [100] caracteres<br/>";
+                }
+            }
+            if (!mensagem.equals("")) {
+                throw new JuizException(mensagem);
             }
         }
     }

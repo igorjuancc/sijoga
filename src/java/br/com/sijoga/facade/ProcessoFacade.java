@@ -158,17 +158,14 @@ public class ProcessoFacade {
         }
     }
 
-    public static List<Processo> listaTodosProcessosJuiz(Juiz juiz) throws DaoException {
+    public static List<Processo> listaTodosProcessosJuiz(Juiz juiz) {
         try {
             return processoDao.listaTodosProcessosJuiz(juiz);
         } catch (DaoException e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-            throw e;
-        } catch (Exception e) {
-            System.out.println("****Problema ao listar processos de juiz [Facade]****" + e);
-            e.printStackTrace();
-            throw e;
+            e.printStackTrace(System.out);
+            String msg = "Houve um problema ao listar processos de juiz";
+            SijogaUtil.mensagemErroRedirecionamento(msg);
+            return null;
         }
     }
 
