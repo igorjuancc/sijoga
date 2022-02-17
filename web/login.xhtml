@@ -40,13 +40,18 @@
                                 <div class="checkbox mb-3">
                                     <p:messages showDetail="false" />                                
                                 </div>
-                                <h:commandButton value="Entrar" action="#{loginMb.efetuaLogin}" class="btn btn-lg btn-secondary btn-block" />             
+                                <h:commandButton value="Entrar" action="#{loginMb.efetuaLogin}" class="btn btn-lg btn-secondary btn-block" onclick="PF('statusDialog').show()" />             
                             </h:form>                                                       
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <p:ajaxStatus onstart="PF('statusDialog').show();" onsuccess="PF('statusDialog').hide();"/>  
+        <p:dialog showHeader="false" modal="true" widgetVar="statusDialog" draggable="false" closable="false"  style="background-color: black">  
+            <p:graphicImage value="img/load.gif" />
+        </p:dialog> 
 
     </h:body>
 </html>
