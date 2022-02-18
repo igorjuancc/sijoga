@@ -2,9 +2,11 @@ package br.com.sijoga.validator;
 
 import br.com.sijoga.bean.Advogado;
 import br.com.sijoga.bean.Juiz;
+import br.com.sijoga.bean.Parte;
 import br.com.sijoga.bean.Pessoa;
 import br.com.sijoga.exception.AdvogadoException;
 import br.com.sijoga.exception.JuizException;
+import br.com.sijoga.exception.ParteException;
 import br.com.sijoga.util.Seguranca;
 import br.com.sijoga.util.SijogaUtil;
 import java.util.Date;
@@ -79,7 +81,7 @@ public class PessoaValidator {
             }
         }
     }
-    
+
     public static void validaJuiz(Juiz juiz) throws JuizException {
         if (juiz == null) {
             throw new JuizException("Juiz inválido");
@@ -109,4 +111,29 @@ public class PessoaValidator {
         }
     }
 
+    public static void validaParte(Parte parte) throws ParteException {
+        if (parte == null) {
+            throw new ParteException("parte inválida");
+        } else {
+            String mensagem = validaPessoa(parte);
+            if (SijogaUtil.idade(parte.getDataNascimento()) < 18) {
+                mensagem += "A parte não pode ser menor de idade<br/>";
+            }
+            if ((parte.getSenha() == null)
+                    || (parte.getSenha().isEmpty())
+                    || (parte.getSenha().trim().equals(""))) {
+                mensagem += "Senha inválida<br/>";
+            } else {
+                if (parte.getSenha().length() < 5) {
+                    mensagem += "Senha inválida, Mínimo [5] caracteres<br/>";
+                }
+                if (parte.getSenha().length() > 100) {
+                    mensagem += "Senha inválida, Máximo [100] caracteres<br/>";
+                }
+            }
+            if (!mensagem.equals("")) {
+                throw new ParteException(mensagem);
+            }
+        }
+    }
 }
