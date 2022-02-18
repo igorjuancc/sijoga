@@ -1,11 +1,7 @@
 package br.com.sijoga.mb;
 
-import br.com.sijoga.util.SijogaUtil;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
@@ -30,11 +26,7 @@ public class RelatorioMb implements Serializable {
         try {
             
         } catch (Exception e) {
-            try {
-                SijogaUtil.mensagemErroRedirecionamento(e);
-            } catch (IOException ex) {
-                Logger.getLogger(ProcessoMb.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            
         }
     }
 

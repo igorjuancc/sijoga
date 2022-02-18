@@ -14,7 +14,6 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-
 @Path("/sijoga")
 public class SijogaResource {
 
@@ -23,18 +22,16 @@ public class SijogaResource {
 
     public SijogaResource() {
     }
- 
+
     @POST
     @Path("/execIntimacao")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response novaIntimacao(IntimacaoDto intimacaoDto) throws DaoException, Exception {
-        if (!IntimacaoFacade.montaFaseProcesso(intimacaoDto).isEmpty()) {
-            intimacaoDto.setId(0);
-        } 
+    public Response novaIntimacao(IntimacaoDto intimacaoDto) {
+        IntimacaoFacade.montaFaseProcesso(intimacaoDto);
         return Response.ok().entity(intimacaoDto).build();
     }
-       
+
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     public void putJson(String content) {
