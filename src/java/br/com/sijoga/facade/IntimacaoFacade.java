@@ -7,6 +7,7 @@ import br.com.sijoga.dto.IntimacaoDto;
 import br.com.sijoga.dto.OficialDto;
 import br.com.sijoga.exception.ArquivoException;
 import br.com.sijoga.exception.DocumentoException;
+import br.com.sijoga.exception.EnderecoException;
 import br.com.sijoga.exception.FaseException;
 import br.com.sijoga.exception.IntimacaoException;
 import br.com.sijoga.util.SijogaUtil;
@@ -58,15 +59,15 @@ public class IntimacaoFacade {
                 intimacao = resp.readEntity(IntimacaoDto.class);
                 //intimacao = client.target("http://localhost:8080/SOSIFOD/webresources/sosifod/novaIntimacao").request(MediaType.APPLICATION_JSON).post(Entity.json(intimacao), IntimacaoDto.class);
 
-                if (resp.getStatus() == 200) {
-                    montaFaseProcesso(intimacao);
+                if (resp.getStatus() == 200) {                    
+                    FaseProcessoFacade.cadastrarFaseProcesso(montaFaseProcesso(intimacao), null);
                 } else {
                     msg = "Houve um problema ao cadastrar uma nova intimação: <br />";
                     msg += SijogaUtil.statusHttp(resp.getStatus());
                     SijogaUtil.mensagemErroRedirecionamento(msg);
                 }
             }
-        } catch (Exception e) {
+        } catch (ArquivoException | DocumentoException | EnderecoException | FaseException e) {
             e.printStackTrace(System.out);
             msg = "Houve um problema ao cadastrar uma nova intimação";
             SijogaUtil.mensagemErroRedirecionamento(msg);
@@ -99,48 +100,38 @@ public class IntimacaoFacade {
         }
     }
 
-    public static void montaFaseProcesso(IntimacaoDto intimacao) {
-        try {
-            FaseProcesso fase = new FaseProcesso();
-            fase.setProcesso(ProcessoFacade.buscaProcessoId(intimacao.getProcesso()));
-            fase.setTitulo("Intimação Judicial");
-            fase.setDataHora(new Date());
-            fase.setTipo(1);
-            fase.setAdvogado(fase.getProcesso().getFases().get(fase.getProcesso().getFases().size() - 1).getAdvogado()); //Advogado da ultima fase do processo
-
-            SimpleDateFormat fmt = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-            String str = fmt.format(intimacao.getDataHora());
-            String str2 = "";
-            String status;
-            if (intimacao.getDataHoraExec() != null) {
-                str2 = fmt.format(intimacao.getDataHoraExec());
-            }
-            if (intimacao.getStatus() != null) {
-                if (intimacao.getStatus()) {
-                    status = "EXECUTADO";
-                } else {
-                    status = "NÃO EXECUTADO";
-                }
-            } else {
-                status = "PARA EXECUÇÃO";
-            }
-
-            String desc = "Intimação Judicial Nº" + Integer.toString(intimacao.getId())
-                    + "<br />Data e hora da solicitação: " + str
-                    + "<br />Data e hora execução: " + str2
-                    + "<br />Estado da execução: " + status
-                    + "<br />Juiz: " + fase.getProcesso().getJuiz().getNome() + " OAB: " + fase.getProcesso().getJuiz().getRegistroOab()
-                    + "<br />Advogado Solicitante: " + fase.getAdvogado().getNome() + " OAB: " + Integer.toString(fase.getAdvogado().getRegistroOab())
-                    + "<br />Intimado: " + (fase.getProcesso().getPromovente().getCpf().equals(intimacao.getCpf()) ? fase.getProcesso().getPromovente().getNome() : fase.getProcesso().getPromovido().getNome())
-                    + "<br />Oficial de Justiça: " + intimacao.getOficial().getNome();
-
-            fase.setDescricao(desc);
-            FaseProcessoFacade.cadastrarFaseProcesso(fase, null);
-        } catch (ArquivoException | DocumentoException | FaseException e) {
-            e.printStackTrace(System.out);
-            String msg = "Houve um problema ao montar fase do processo: <br />";
-            msg += e.getMessage();
-            SijogaUtil.mensagemErroRedirecionamento(msg);
+    public static FaseProcesso montaFaseProcesso(IntimacaoDto intimacao) {
+        FaseProcesso fase = new FaseProcesso();
+        fase.setProcesso(ProcessoFacade.buscaProcessoId(intimacao.getProcesso()));
+        fase.setTitulo("Intimação Judicial");
+        fase.setDataHora(new Date());
+        fase.setTipo(1);
+        fase.setAdvogado(fase.getProcesso().getFases().get(fase.getProcesso().getFases().size() - 1).getAdvogado()); //Advogado da ultima fase do processo
+        SimpleDateFormat fmt = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        String str = fmt.format(intimacao.getDataHora());
+        String str2 = "";
+        String status;
+        if (intimacao.getDataHoraExec() != null) {
+            str2 = fmt.format(intimacao.getDataHoraExec());
         }
+        if (intimacao.getStatus() != null) {
+            if (intimacao.getStatus()) {
+                status = "EXECUTADO";
+            } else {
+                status = "NÃO EXECUTADO";
+            }
+        } else {
+            status = "PARA EXECUÇÃO";
+        }
+        String desc = "Intimação Judicial Nº" + Integer.toString(intimacao.getId())
+                + "<br />Data e hora da solicitação: " + str
+                + "<br />Data e hora execução: " + str2
+                + "<br />Estado da execução: " + status
+                + "<br />Juiz: " + fase.getProcesso().getJuiz().getNome() + " OAB: " + fase.getProcesso().getJuiz().getRegistroOab()
+                + "<br />Advogado Solicitante: " + fase.getAdvogado().getNome() + " OAB: " + Integer.toString(fase.getAdvogado().getRegistroOab())
+                + "<br />Intimado: " + (fase.getProcesso().getPromovente().getCpf().equals(intimacao.getCpf()) ? fase.getProcesso().getPromovente().getNome() : fase.getProcesso().getPromovido().getNome())
+                + "<br />Oficial de Justiça: " + intimacao.getOficial().getNome();
+        fase.setDescricao(desc);
+        return fase;
     }
 }

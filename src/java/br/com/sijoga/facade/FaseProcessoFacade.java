@@ -78,6 +78,35 @@ public class FaseProcessoFacade {
         }
     }
 
+    public static void cadastrarFaseProcessoWs(FaseProcesso faseProcesso) throws FaseException {
+        try {
+            Date dataHoje = new Date();
+            faseProcesso.setDataHora(dataHoje);
+
+            if ((faseProcesso.getProcesso().getFases() != null) && (!faseProcesso.getProcesso().getFases().isEmpty())) {
+                if ((faseProcesso.getProcesso().getFases().get(faseProcesso.getProcesso().getFases().size() - 1).getTipo() == 2)
+                        && (faseProcesso.getProcesso().getFases().get(faseProcesso.getProcesso().getFases().size() - 1).getJustificativa() == null)) {
+                    throw new FaseException("Processo aguardando resposta do juiz");
+                }
+            }
+            if (faseProcesso.getProcesso().getVencedor() != null) {
+                throw new FaseException("Processo já foi finalizado, impossivel adicionar novas fases!");
+            } else {
+                faseProcesso.setTitulo((faseProcesso.getTitulo() != null) ? faseProcesso.getTitulo().trim().toUpperCase() : null);
+                faseProcesso.setDescricao((faseProcesso.getDescricao() != null) ? faseProcesso.getDescricao().trim().toUpperCase() : null);
+                ProcessoValidator.validaFase(faseProcesso);
+
+                if ((faseProcesso.getProcesso() == null) || (faseProcesso.getProcesso().getId() == 0)) {
+                    throw new FaseException("Necessário o número do processo para criação de uma nova fase");
+                }
+                faseProcessoDao.cadastrarFaseProcesso(faseProcesso);
+            }
+        } catch (DaoException e) {
+            String msg = "Houve um problema ao cadastrar nova fase do processo" + e.getMessage();
+            throw new FaseException(msg);            
+        }
+    }
+
     public static Boolean salvarArquivoFase(FaseProcesso faseProcesso, UploadedFile arquivo) {
         String caminho = SijogaUtil.caminhoProjeto() + "Documentos\\";
         String nomeArquivo = Integer.toString(faseProcesso.getDocumento().getId()) + faseProcesso.getDocumento().getExtensao();

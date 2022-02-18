@@ -9,6 +9,7 @@ import br.com.sijoga.dto.OficialDto;
 import br.com.sijoga.exception.ArquivoException;
 import br.com.sijoga.exception.DocumentoException;
 import br.com.sijoga.exception.FaseException;
+import br.com.sijoga.exception.IntimacaoException;
 import br.com.sijoga.exception.ProcessoException;
 import br.com.sijoga.facade.AdvogadoFacade;
 import br.com.sijoga.facade.FaseProcessoFacade;
@@ -20,6 +21,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
@@ -216,11 +219,20 @@ public class ProcessoMb implements Serializable {
     }
 
     public void criarIntimacao() {
+        FacesContext ctx = null;
         try {
             this.intimacao.setProcesso((this.processo != null) ? this.processo.getId() : 0);
+            IntimacaoFacade.cadastrarIntimacao(this.intimacao, this.intimado);            
             ExternalContext ctxExt = FacesContext.getCurrentInstance().getExternalContext();
             FacesContext.getCurrentInstance().getExternalContext().getFlash().put("idProcesso", this.processo.getId());
             ctxExt.redirect(ctxExt.getRequestContextPath() + "/Juiz/VisualizarProcesso.jsf");
+        } catch (IntimacaoException e) {
+            if (ctx != null) {
+                ctx.addMessage(null, SijogaUtil.emiteMsg(e.getMessage(), 2));
+            } else {
+                e.printStackTrace(System.out);
+                SijogaUtil.mensagemErroRedirecionamento("Houve um problema ao criar intimação");
+            }
         } catch (IOException e) {
             e.printStackTrace(System.out);
             SijogaUtil.mensagemErroRedirecionamento("Houve um problema ao criar intimação");
