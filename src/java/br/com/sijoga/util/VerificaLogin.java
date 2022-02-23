@@ -20,7 +20,6 @@ public class VerificaLogin implements PhaseListener {
         try {
             FacesContext ctx = FacesContext.getCurrentInstance();
             String pagina = ctx.getViewRoot().getViewId();                           //Nome da pagina atual
-            Application app = ctx.getApplication();
             ExternalContext ctxExt = FacesContext.getCurrentInstance().getExternalContext();
             int opcCase = 0;
 
@@ -50,7 +49,8 @@ public class VerificaLogin implements PhaseListener {
                     }
                     break;
                 case 3:
-                    if ((!pagina.equals("/Parte/InicioParte.xhtml")) && (!pagina.equals("/Parte/VisualizarProcesso.xhtml")) && (!pagina.equals("/ErroPage.xhtml"))) {
+                    if ((!pagina.equals("/Parte/InicioParte.xhtml")) && (!pagina.equals("/Parte/VisualizarProcesso.xhtml")) && (!pagina.equals("/ErroPage.xhtml"))
+                            && (!pagina.equals("/Parte/RelatorioParte.xhtml"))) {
                         ctxExt.redirect(ctxExt.getRequestContextPath() + "/Parte/InicioParte.jsf");
                     }
                     break;

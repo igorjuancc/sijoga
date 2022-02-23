@@ -30,7 +30,7 @@ public class RelatorioFacade {
                 FacesContext ctx = FacesContext.getCurrentInstance();
                 Application app = ctx.getApplication();
                 LoginMb usuario = app.evaluateExpressionGet(ctx, "#{loginMb}", LoginMb.class);
-                
+
                 String jasper = "Relatorios/ProcessosEmAberto.jasper";
                 URL jasperURL = new URL(host + jasper);
                 HashMap params = new HashMap();
@@ -51,8 +51,8 @@ public class RelatorioFacade {
             finalizaSessaoHibernate();
         }
     }
-    
-     public static byte[] relatorioProcessosEncerrados(Date dataInicial, Date dataFinal) throws RelatorioException {
+
+    public static byte[] relatorioProcessosEncerrados(Date dataInicial, Date dataFinal) throws RelatorioException {
         try {
             if ((dataInicial == null)) {
                 throw new RelatorioException("Data inicial inválida");
@@ -62,7 +62,7 @@ public class RelatorioFacade {
                 FacesContext ctx = FacesContext.getCurrentInstance();
                 Application app = ctx.getApplication();
                 LoginMb usuario = app.evaluateExpressionGet(ctx, "#{loginMb}", LoginMb.class);
-                
+
                 String jasper = "Relatorios/ProcessosEncerrados.jasper";
                 URL jasperURL = new URL(host + jasper);
                 HashMap params = new HashMap();
@@ -74,6 +74,29 @@ public class RelatorioFacade {
                         params,
                         connectionHibernate());
             }
+        } catch (IOException | JRException e) {
+            e.printStackTrace(System.out);
+            String msg = "Houve um problema ao gerar relatório";
+            SijogaUtil.mensagemErroRedirecionamento(msg);
+            return null;
+        } finally {
+            finalizaSessaoHibernate();
+        }
+    }
+
+    public static byte[] relatorioParte() throws RelatorioException {
+        try {
+            FacesContext ctx = FacesContext.getCurrentInstance();
+            Application app = ctx.getApplication();
+            LoginMb usuario = app.evaluateExpressionGet(ctx, "#{loginMb}", LoginMb.class);
+
+            String jasper = "Relatorios/ProcessosParte.jasper";
+            URL jasperURL = new URL(host + jasper);
+            HashMap params = new HashMap();
+            params.put("idParte", usuario.getParte().getId());
+            return JasperRunManager.runReportToPdf(jasperURL.openStream(),
+                    params,
+                    connectionHibernate());
         } catch (IOException | JRException e) {
             e.printStackTrace(System.out);
             String msg = "Houve um problema ao gerar relatório";

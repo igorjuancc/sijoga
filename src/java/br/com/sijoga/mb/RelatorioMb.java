@@ -58,18 +58,43 @@ public class RelatorioMb implements Serializable {
         this.previewRelatorio = RelatorioFacade.relatorioProcessosAbertos(dataInicio, dataFim);
         if (this.previewRelatorio.length <= 961) {
             throw new RelatorioException("Não há dados para as datas informadas");
+        } else {
+            PF.current().executeScript("PF('divViewRelatorio').show()");
         }
-        PF.current().executeScript("PF('divViewRelatorio').show()");
     }
-    
+
     private void relatorioProcessosEncerrados() throws RelatorioException {
         this.previewRelatorio = RelatorioFacade.relatorioProcessosEncerrados(dataInicio, dataFim);
         if (this.previewRelatorio.length <= 961) {
             throw new RelatorioException("Não há dados para as datas informadas");
+        } else {
+            PF.current().executeScript("PF('divViewRelatorio').show()");
         }
-        PF.current().executeScript("PF('divViewRelatorio').show()");
     }
-    
+
+    public void gerarRelatorioParte() {
+        try {
+            this.previewRelatorio = RelatorioFacade.relatorioParte();
+            if (this.previewRelatorio.length <= 961) {
+                throw new RelatorioException("Não há dados para as datas informadas");
+            } else {
+                PF.current().executeScript("PF('divViewRelatorio').show()");
+            }
+        } catch (RelatorioException e) {
+            FacesContext ctx = FacesContext.getCurrentInstance();
+            if (ctx != null) {
+                ctx.addMessage(null, SijogaUtil.emiteMsg(e.getMessage(), 2));
+                PF.current().ajax().update("formRelatorio:mensagem");
+            } else {
+                e.printStackTrace(System.out);
+                SijogaUtil.mensagemErroRedirecionamento("Houve um problema ao processar relatório");
+            }
+        } catch (Exception e) {
+            e.printStackTrace(System.out);
+            SijogaUtil.mensagemErroRedirecionamento("Houve um problema ao processar relatório");
+        }
+    }
+
     public String verRelatorioBase64(byte[] relatorio) {
         return Base64.getEncoder().encodeToString(relatorio);
     }
