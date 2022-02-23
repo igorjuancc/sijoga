@@ -54,15 +54,14 @@ public class IntimacaoFacade {
                 intimacao.setDataHora(new Date());
 
                 Client client = ClientBuilder.newClient();
-                WebTarget target = client.target("http://localhost:8080/SOSIFOD/webresources/sosifod/novaIntimacao");
-                Response resp = target.request().accept(MediaType.APPLICATION_JSON).post(Entity.entity(intimacao, MediaType.APPLICATION_JSON));
-                intimacao = resp.readEntity(IntimacaoDto.class);
-                //intimacao = client.target("http://localhost:8080/SOSIFOD/webresources/sosifod/novaIntimacao").request(MediaType.APPLICATION_JSON).post(Entity.json(intimacao), IntimacaoDto.class);
+                WebTarget target = client.target("http://localhost:8080/sosifod/webresources/sosifod/novaIntimacao");
+                Response resp = target.request().accept(MediaType.APPLICATION_JSON).post(Entity.entity(intimacao, MediaType.APPLICATION_JSON));                
 
                 if (resp.getStatus() == 200) {                    
+                    intimacao = resp.readEntity(IntimacaoDto.class);
                     FaseProcessoFacade.cadastrarFaseProcesso(montaFaseProcesso(intimacao), null);
                 } else {
-                    msg = "Houve um problema ao cadastrar uma nova intimação: <br />";
+                    msg = "Houve um problema ao cadastrar uma nova intimação: ";
                     msg += SijogaUtil.statusHttp(resp.getStatus());
                     SijogaUtil.mensagemErroRedirecionamento(msg);
                 }
@@ -74,30 +73,20 @@ public class IntimacaoFacade {
         }
     }
 
-    public static List<OficialDto> listaOficiais() {
-        String msg;
-        try {
+    public static List<OficialDto> listaOficiais() throws IntimacaoException {
             List<OficialDto> lista;
             Client client = ClientBuilder.newClient();
-            Response resp = client.target("http://localhost:8080/SOSIFOD/webresources/sosifod/oficiais").request(MediaType.APPLICATION_JSON).get();
+            Response resp = client.target("http://localhost:8080/sosifod/webresources/sosifod/oficiais").request(MediaType.APPLICATION_JSON).get();
 
             if (resp.getStatus() == 200) {
                 lista = resp.readEntity(new GenericType<List<OficialDto>>() {
                 });
             } else {
-                msg = "Houve um problema ao buscar a lista de oficiais de justiça: <br />";
+                String msg = "Houve um problema ao buscar a lista de oficiais de justiça: <br />";
                 msg += SijogaUtil.statusHttp(resp.getStatus());
-                SijogaUtil.mensagemErroRedirecionamento(msg);
-                return null;
+                throw new IntimacaoException(msg);
             }
-
-            return lista;
-        } catch (Exception e) {
-            e.printStackTrace(System.out);
-            msg = "Houve um problema ao buscar a lista de oficiais de justiça";
-            SijogaUtil.mensagemErroRedirecionamento(msg);
-            return null;
-        }
+            return lista;        
     }
 
     public static FaseProcesso montaFaseProcesso(IntimacaoDto intimacao) {

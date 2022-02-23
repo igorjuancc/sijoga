@@ -21,8 +21,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
@@ -121,6 +119,8 @@ public class ProcessoMb implements Serializable {
             e.printStackTrace(System.out);
             String msg = "Problemas ao inicializar página " + FacesContext.getCurrentInstance().getViewRoot().getViewId();
             SijogaUtil.mensagemErroRedirecionamento(msg);
+        } catch (IntimacaoException ex) {
+            SijogaUtil.mensagemErroRedirecionamento(ex.getMessage());
         }
     }
 

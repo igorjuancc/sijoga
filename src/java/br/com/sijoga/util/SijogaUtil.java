@@ -265,7 +265,7 @@ public class SijogaUtil {
                 rtn = "Proibido";
                 break;
             case 404:
-                rtn = "Não encontrado";
+                rtn = "Recurso não encontrado";
                 break;
             case 405:
                 rtn = "Método não permitido";

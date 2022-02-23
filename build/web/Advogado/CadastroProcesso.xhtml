@@ -18,7 +18,7 @@
             <p:panel rendered="#{!processoMb.cadastroConcluido}">
                 <div class="form-row">                 
                     <div class="form-group col-md-6">
-                        <p:messages id="mensagem"  showDetail="false" />
+                        <p:messages id="mensagem"  showDetail="false" escape="false" />
                         <p:outputLabel for="titulo" value="Titulo" style="font-size: small"/>
                         <h:inputText a:placeholder="Título" class="form-control" id="titulo" value="#{processoMb.faseProcesso.titulo}" 
                                      required="true" requiredMessage="Insira um título" validatorMessage="Insira um titulo válido">
