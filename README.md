@@ -7,6 +7,8 @@ O Sistema Jurídico On-line Para Grandes Administrações - SIJOGA, é uma aplic
 O SIJOGA possuí integração com a aplicação [Sistema Online Sobre Informações Factíveis de
 Oficiais de Justiça Do Paraná - SOSIFOD](https://github.com/igorjuancc/sosifod) via web service para a solcitação de intimações judiciais, obtenção da lista de oficiais de justiça disponíveis e o cadastro de novas fases do processo referêntes as intimações requisitadas.
 
+# Índice
+
 <!--ts-->
    * [Resumo](#Sistema-Jurídico-On-line-Para-Grandes-Administrações)
    * [Índice](#Índice)
