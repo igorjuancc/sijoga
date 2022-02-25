@@ -95,7 +95,7 @@ git clone https://github.com/igorjuancc/sijoga
      $ ant
     ```
     
-7. Copie o arquivo SGR.war da pasta "dist" para a pasta autodeploy do servidor glassfish ou insira via interface gráfica do console do servidor.
+7. Copie o arquivo SIJOGA.war da pasta "dist" para a pasta autodeploy do servidor glassfish ou insira via interface gráfica do console do servidor.
 ```
 cd ~/sijoga/dist
 cp SIJOGA.war ~/glassfish4/glassfish/domains/domain1/autodeploy
